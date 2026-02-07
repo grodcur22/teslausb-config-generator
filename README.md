@@ -7,7 +7,7 @@ This tool creates configuration files specifically for:
 **[marcone/teslausb](https://github.com/marcone/teslausb)** - The Raspberry Pi Tesla Dashcam archiving project.
 
 ## 🚀 How to use
-1. Go to the live generator: **https**
+1. Go to the live generator: **https://grodcur22.github.io/teslausb-config-generator/**
 2. Fill out the form with your desired settings (WiFi, Archive settings, Push notifications, etc.).
 3. Click "Generate Config".
 4. Rename the downloaded file to `teslausb_setup_variables.conf`.
