@@ -1,0 +1,2333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeslaUSB - Generador de Configuración</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .header p { opacity: 0.9; font-size: 1.1em; }
+        .content { padding: 40px; }
+        .section {
+            margin-bottom: 40px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .section-header {
+            background: #f3f4f6;
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+        .section-header:hover { background: #e5e7eb; }
+        .section-header h2 { color: #1f2937; font-size: 1.3em; }
+        .section-header .toggle { font-size: 1.5em; color: #6b7280; }
+        .section-content { padding: 30px; display: none; }
+        .section-content.active { display: block; }
+        .field-group {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+        .field-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .field-header input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+        .field-header label {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 1.1em;
+            cursor: pointer;
+        }
+        .field-description {
+            color: #6b7280;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        .field-inputs { display: none; }
+        .field-inputs.active { display: block; }
+        .input-row { margin-bottom: 12px; }
+        .input-row label {
+            display: block;
+            color: #374151;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .input-row input[type="text"],
+        .input-row input[type="password"],
+        .input-row input[type="number"],
+        .input-row select,
+        .input-row textarea {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        .input-row textarea {
+            min-height: 80px;
+            resize: vertical;
+            font-family: monospace;
+        }
+        .input-row input:focus,
+        .input-row select:focus,
+        .input-row textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        .input-hint {
+            font-size: 0.85em;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .radio-group input[type="radio"] { margin-right: 8px; }
+        .action-buttons {
+            position: sticky;
+            bottom: 0;
+            background: white;
+            padding: 30px;
+            border-top: 2px solid #e5e7eb;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.4);
+        }
+        .btn-secondary { background: #6b7280; color: white; }
+        .btn-secondary:hover { background: #4b5563; }
+        .warning-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 6px;
+        }
+        .warning-box strong {
+            color: #92400e;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .warning-box p {
+            color: #78350f;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        .info-box {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 6px;
+        }
+        .info-box strong {
+            color: #1e40af;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .info-box p {
+            color: #1e3a8a;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 TeslaUSB Config Generator</h1>
+            <p>Generador de configuración amigable para TeslaUSB - Todas las variables incluidas</p>
+        </div>
+
+        <div class="content">
+            <!-- WiFi Setup -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>📶 Configuración WiFi</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="info-box">
+                        <strong>Información:</strong>
+                        <p>No necesitas configurar esto si tu red ya está configurada y ejecutaste "install.sh". Algunos dispositivos como Raspberry Pi Zero W solo soportan WiFi 2.4 GHz.</p>
+                    </div>
+                    
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_wifi" onchange="toggleField('wifi_fields')">
+                            <label for="enable_wifi">Configurar WiFi</label>
+                        </div>
+                        <div class="field-inputs" id="wifi_fields">
+                            <div class="input-row">
+                                <label>Nombre de la red (SSID):</label>
+                                <input type="text" id="SSID" placeholder="mi_red_wifi">
+                            </div>
+                            <div class="input-row">
+                                <label>Contraseña WiFi:</label>
+                                <input type="password" id="WIFIPASS" placeholder="contraseña_segura">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Archive System -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>💾 Sistema de Archivo</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="warning-box">
+                        <strong>¡Importante!</strong>
+                        <p>Elige SOLO UN sistema de archivo. Si quieres usar rsync, rclone o NFS, borra o comenta la sección CIFS.</p>
+                    </div>
+
+                    <!-- CIFS -->
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_cifs" onchange="toggleField('cifs_fields'); uncheckOthers('enable_cifs', ['enable_rsync', 'enable_rclone', 'enable_nfs'])">
+                            <label for="enable_cifs">CIFS (Windows/Mac File Sharing)</label>
+                        </div>
+                        <div class="field-description">
+                            Sistema para compartir archivos con Windows o Mac
+                        </div>
+                        <div class="field-inputs" id="cifs_fields">
+                            <div class="input-row">
+                                <label>Servidor:</label>
+                                <input type="text" id="ARCHIVE_SERVER_cifs" placeholder="192.168.1.100 o nombre_servidor">
+                            </div>
+                            <div class="input-row">
+                                <label>Nombre del recurso compartido:</label>
+                                <input type="text" id="SHARE_NAME" placeholder="TeslaCam o TeslaCam/videos">
+                                <div class="input-hint">Puede incluir una ruta opcional</div>
+                            </div>
+                            <div class="input-row">
+                                <label>Usuario:</label>
+                                <input type="text" id="SHARE_USER" placeholder="usuario">
+                            </div>
+                            <div class="input-row">
+                                <label>Contraseña:</label>
+                                <input type="password" id="SHARE_PASSWORD" placeholder="contraseña">
+                            </div>
+                            
+                            <div class="field-group" style="margin-top: 20px; background: #fff; border-left-color: #9ca3af;">
+                                <div class="field-header">
+                                    <input type="checkbox" id="enable_cifs_advanced" onchange="toggleField('cifs_advanced_fields')">
+                                    <label for="enable_cifs_advanced">Opciones avanzadas CIFS (normalmente no necesarias)</label>
+                                </div>
+                                <div class="field-inputs" id="cifs_advanced_fields">
+                                    <div class="input-row">
+                                        <label>Dominio:</label>
+                                        <input type="text" id="SHARE_DOMAIN" placeholder="DOMINIO">
+                                    </div>
+                                    <div class="input-row">
+                                        <label>Versión CIFS:</label>
+                                        <input type="text" id="CIFS_VERSION" placeholder="3.0">
+                                    </div>
+                                    <div class="input-row">
+                                        <label>Seguridad CIFS:</label>
+                                        <input type="text" id="CIFS_SEC" placeholder="ntlm">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RSYNC -->
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_rsync" onchange="toggleField('rsync_fields'); uncheckOthers('enable_rsync', ['enable_cifs', 'enable_rclone', 'enable_nfs'])">
+                            <label for="enable_rsync">rsync</label>
+                        </div>
+                        <div class="field-description">
+                            Sistema de sincronización eficiente via SSH. Para instrucciones de autenticación SSH: 
+                            <a href="https://github.com/marcone/teslausb/blob/main-dev/doc/SetupRSync.md#step-1-authentication" target="_blank">Ver documentación</a>
+                        </div>
+                        <div class="field-inputs" id="rsync_fields">
+                            <div class="input-row">
+                                <label>Usuario rsync:</label>
+                                <input type="text" id="RSYNC_USER" placeholder="usuario">
+                            </div>
+                            <div class="input-row">
+                                <label>Servidor rsync:</label>
+                                <input type="text" id="RSYNC_SERVER" placeholder="192.168.1.100 o hostname">
+                            </div>
+                            <div class="input-row">
+                                <label>Ruta en el servidor:</label>
+                                <input type="text" id="RSYNC_PATH" placeholder="/ruta/en/servidor">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RCLONE -->
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_rclone" onchange="toggleField('rclone_fields'); uncheckOthers('enable_rclone', ['enable_cifs', 'enable_rsync', 'enable_nfs'])">
+                            <label for="enable_rclone">rclone (Cloud Storage)</label>
+                        </div>
+                        <div class="field-description">
+                            Sistema para almacenamiento en la nube (Google Drive, Dropbox, etc.) o servidor local
+                        </div>
+                        <div class="field-inputs" id="rclone_fields">
+                            <div class="input-row">
+                                <label>Servidor (para local) o DNS público:</label>
+                                <input type="text" id="ARCHIVE_SERVER_rclone" placeholder="8.8.8.8 o IP del servidor">
+                                <div class="input-hint">Si usas servidor local, pon su IP. Para cloud, puedes usar 8.8.8.8</div>
+                            </div>
+                            <div class="input-row">
+                                <label>Nombre del remoto:</label>
+                                <input type="text" id="RCLONE_DRIVE" placeholder="gdrive">
+                            </div>
+                            <div class="input-row">
+                                <label>Ruta remota:</label>
+                                <input type="text" id="RCLONE_PATH" placeholder="TeslaCam">
+                            </div>
+                            <div class="field-header" style="margin-top: 15px;">
+                                <input type="checkbox" id="enable_rclone_flags" onchange="toggleField('rclone_flags_fields')">
+                                <label for="enable_rclone_flags">Flags adicionales de rclone (opcional)</label>
+                            </div>
+                            <div class="field-inputs" id="rclone_flags_fields">
+                                <div class="input-row">
+                                    <label>Flags (formato array bash):</label>
+                                    <input type="text" id="RCLONE_FLAGS" placeholder="()">
+                                    <div class="input-hint">Ejemplo: (--flag1 --flag2)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NFS -->
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_nfs" onchange="toggleField('nfs_fields'); uncheckOthers('enable_nfs', ['enable_cifs', 'enable_rsync', 'enable_rclone'])">
+                            <label for="enable_nfs">NFS</label>
+                        </div>
+                        <div class="field-description">
+                            Network File System (común en servidores Linux/NAS)
+                        </div>
+                        <div class="field-inputs" id="nfs_fields">
+                            <div class="input-row">
+                                <label>Servidor NFS:</label>
+                                <input type="text" id="ARCHIVE_SERVER_nfs" placeholder="192.168.1.100 o hostname">
+                            </div>
+                            <div class="input-row">
+                                <label>Ruta de exportación exacta:</label>
+                                <input type="text" id="SHARE_NAME_nfs" placeholder="/volume1/TeslaCam">
+                                <div class="input-hint">Debe ser la ruta exacta de exportación en el NAS (ej: /volume1/TeslaCam)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Storage Configuration -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>🗄️ Configuración de Almacenamiento</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="info-box">
+                        <strong>Notas sobre tarjetas SD y tamaños:</strong>
+                        <p>• Se recomienda una tarjeta SD de 128 GB o más (mínimo 64 GB)<br>
+                        • El script reservará 6 GB de espacio fijo<br>
+                        • CAM_SIZE de 40G es recomendado, a menos que acumules mucho video<br>
+                        • Una hora de grabaciones = 7-10 GB de datos (dependiendo del modelo del auto)<br>
+                        • MUSIC_SIZE debe ser suficiente para tu biblioteca de música<br>
+                        • Si no especificas un tamaño, esa unidad no se creará</p>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_data_drive" onchange="toggleField('data_drive_fields')">
+                            <label for="enable_data_drive">Unidad de datos separada (DATA_DRIVE)</label>
+                        </div>
+                        <div class="field-description">
+                            Usar una unidad diferente a la de arranque para almacenar grabaciones
+                        </div>
+                        <div class="field-inputs" id="data_drive_fields">
+                            <div class="warning-box">
+                                <strong>¡ADVERTENCIA!</strong>
+                                <p>La unidad especificada será BORRADA y reparticionada completamente. NO descomentes esta línea si planeas usar SOLO una tarjeta SD para arranque y almacenamiento.</p>
+                            </div>
+                            <div class="input-row">
+                                <label>Dispositivo:</label>
+                                <input type="text" id="DATA_DRIVE" placeholder="/dev/sda o /dev/nvme0n1">
+                                <div class="input-hint">Ejemplo: /dev/sda para USB, /dev/nvme0n1 para NVME integrado</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_snapshot_interval" onchange="toggleField('snapshot_interval_fields')">
+                            <label for="enable_snapshot_interval">Intervalo de captura personalizado (SNAPSHOT_INTERVAL)</label>
+                        </div>
+                        <div class="field-description">
+                            El auto normalmente mantiene 1 hora de RecentClips, pero esto varía por país. Para mantener un registro continuo, el intervalo debe ser ~2 minutos menor que el historial que guarda tu auto. Este ejemplo ajusta para autos que solo guardan 10 minutos.
+                        </div>
+                        <div class="field-inputs" id="snapshot_interval_fields">
+                            <div class="input-row">
+                                <label>Intervalo (segundos):</label>
+                                <input type="number" id="SNAPSHOT_INTERVAL" value="480" placeholder="480">
+                                <div class="input-hint">480 segundos = 8 minutos (para historia de 10 min). Sigue tus regulaciones locales.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_archive_recentclips" onchange="toggleField('archive_recentclips_fields')">
+                            <label for="enable_archive_recentclips">Archivar RecentClips (ARCHIVE_RECENTCLIPS)</label>
+                        </div>
+                        <div class="field-description">
+                            Además de SavedClips, SentryClips y clips de track mode
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_disable_savedclips" onchange="toggleField('disable_savedclips_fields')">
+                            <label for="enable_disable_savedclips">NO archivar SavedClips (ARCHIVE_SAVEDCLIPS=false)</label>
+                        </div>
+                        <div class="field-description">
+                            SavedClips se archivan por defecto, activa esto para desactivarlo
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_disable_sentryclips" onchange="toggleField('disable_sentryclips_fields')">
+                            <label for="enable_disable_sentryclips">NO archivar SentryClips (ARCHIVE_SENTRYCLIPS=false)</label>
+                        </div>
+                        <div class="field-description">
+                            SentryClips se archivan por defecto, activa esto para desactivarlo
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_disable_trackmodeclips" onchange="toggleField('disable_trackmodeclips_fields')">
+                            <label for="enable_disable_trackmodeclips">NO archivar TrackModeClips (ARCHIVE_TRACKMODECLIPS=false)</label>
+                        </div>
+                        <div class="field-description">
+                            TrackModeClips se archivan por defecto, activa esto para desactivarlo
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_cam_size" checked onchange="toggleField('cam_size_fields')">
+                            <label for="enable_cam_size">Tamaño para cámara (CAM_SIZE)</label>
+                        </div>
+                        <div class="field-inputs active" id="cam_size_fields">
+                            <div class="input-row">
+                                <label>Tamaño:</label>
+                                <input type="text" id="CAM_SIZE" value="40G" placeholder="40G">
+                                <div class="input-hint">Recomendado: 40G. Aumentar si acumulas muchas grabaciones entre operaciones de archivo</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_music_size" onchange="toggleField('music_size_fields')">
+                            <label for="enable_music_size">Unidad de música (MUSIC_SIZE)</label>
+                        </div>
+                        <div class="field-inputs" id="music_size_fields">
+                            <div class="input-row">
+                                <label>Tamaño:</label>
+                                <input type="text" id="MUSIC_SIZE" placeholder="4G">
+                                <div class="input-hint">Si no se especifica, no se creará unidad de música</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_lightshow_size" onchange="toggleField('lightshow_size_fields')">
+                            <label for="enable_lightshow_size">Unidad de lightshow (LIGHTSHOW_SIZE)</label>
+                        </div>
+                        <div class="field-inputs" id="lightshow_size_fields">
+                            <div class="input-row">
+                                <label>Tamaño:</label>
+                                <input type="text" id="LIGHTSHOW_SIZE" placeholder="1G">
+                                <div class="input-hint">Si no se especifica, no se creará unidad de lightshow</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_boombox_size" onchange="toggleField('boombox_size_fields')">
+                            <label for="enable_boombox_size">Unidad de boombox (BOOMBOX_SIZE)</label>
+                        </div>
+                        <div class="field-inputs" id="boombox_size_fields">
+                            <div class="input-row">
+                                <label>Tamaño:</label>
+                                <input type="text" id="BOOMBOX_SIZE" placeholder="100M">
+                                <div class="input-hint">Si no se especifica, no se creará unidad de boombox</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_music_share" onchange="toggleField('music_share_fields')">
+                            <label for="enable_music_share">Copiar música automáticamente desde CIFS (MUSIC_SHARE_NAME)</label>
+                        </div>
+                        <div class="field-description">
+                            Si quieres copiar música automáticamente desde un recurso compartido CIFS cada vez que el Pi se conecta a WiFi
+                        </div>
+                        <div class="field-inputs" id="music_share_fields">
+                            <div class="input-row">
+                                <label>Recurso compartido de música:</label>
+                                <input type="text" id="MUSIC_SHARE_NAME" placeholder="your_music_share/music_folder">
+                                <div class="input-hint">Se asume que existe en el mismo servidor que el archivo principal. Puede ser el mismo recurso, pero carpeta diferente</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_use_exfat" onchange="toggleField('use_exfat_fields')">
+                            <label for="enable_use_exfat">Usar ExFAT en lugar de FAT32 (USE_EXFAT)</label>
+                        </div>
+                        <div class="field-description">
+                            ExFAT es el sistema de archivos que usa Tesla cuando formatea la unidad en el auto. NO se recomienda para la imagen precompilada de TeslaUSB (kernel antiguo sin soporte TRIM para ExFAT).
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Network Services -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>🌐 Servicios de Red</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_samba" onchange="toggleField('samba_fields')">
+                            <label for="enable_samba">Servidor Samba/CIFS (SAMBA_ENABLED)</label>
+                        </div>
+                        <div class="field-description">
+                            Hace las grabaciones disponibles como recurso compartido de red. Obsoleto/deprecado, ya que ahora puedes acceder a grabaciones via interfaz web de TeslaUSB.
+                        </div>
+                        <div class="field-inputs" id="samba_fields">
+                            <div class="field-header">
+                                <input type="checkbox" id="enable_samba_guest" onchange="toggleField('samba_guest_fields')">
+                                <label for="enable_samba_guest">Permitir acceso de invitados (SAMBA_GUEST)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_ap" onchange="toggleField('ap_fields')">
+                            <label for="enable_ap">Punto de acceso WiFi (AP_SSID, AP_PASS)</label>
+                        </div>
+                        <div class="field-description">
+                            TeslaUSB actuará como punto de acceso WiFi para acceso en el camino. Debería funcionar en Raspberry Pi pero puede no funcionar en otros dispositivos.
+                        </div>
+                        <div class="field-inputs" id="ap_fields">
+                            <div class="input-row">
+                                <label>Nombre de la red (SSID):</label>
+                                <input type="text" id="AP_SSID" placeholder="TESLAUSB WIFI">
+                            </div>
+                            <div class="input-row">
+                                <label>Contraseña (mínimo 8 caracteres):</label>
+                                <input type="password" id="AP_PASS" placeholder="¡Cambia esto! No uses 'password'">
+                                <div class="input-hint">El script de configuración NO aceptará la contraseña por defecto 'password'. Mínimo 8 caracteres.</div>
+                            </div>
+                            <div class="input-row">
+                                <label>Dirección IP (opcional):</label>
+                                <input type="text" id="AP_IP" placeholder="192.168.66.1">
+                                <div class="input-hint">El AP dará IPs a los clientes en el rango x.x.x.10-254, así que no pongas la IP del AP en ese rango</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_web_auth" onchange="toggleField('web_auth_fields')">
+                            <label for="enable_web_auth">Proteger interfaz web con contraseña (WEB_USERNAME, WEB_PASSWORD)</label>
+                        </div>
+                        <div class="field-inputs" id="web_auth_fields">
+                            <div class="warning-box">
+                                <strong>¡ADVERTENCIA!</strong>
+                                <p>¡Cualquiera en la red WiFi $SSID (y $AP_SSID si está configurado) puede interactuar libremente con la interfaz web de teslausb si no está asegurada!</p>
+                            </div>
+                            <div class="input-row">
+                                <label>Usuario:</label>
+                                <input type="text" id="WEB_USERNAME" placeholder="pi">
+                            </div>
+                            <div class="input-row">
+                                <label>Contraseña:</label>
+                                <input type="password" id="WEB_PASSWORD" placeholder="raspberry">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_timezone" onchange="toggleField('timezone_fields')">
+                            <label for="enable_timezone">Configurar zona horaria (TIME_ZONE)</label>
+                        </div>
+                        <div class="field-description">
+                            Si usas Raspberry Pi OS y quieres una zona horaria diferente a 'BST'. Si usas Armbian, probablemente ya configuró la zona correcta y esto no es necesario. Puede ser una zona horaria real, o "auto" para detección automática.
+                        </div>
+                        <div class="field-inputs" id="timezone_fields">
+                            <div class="input-row">
+                                <label>Zona horaria:</label>
+                                <input type="text" id="TIME_ZONE" placeholder="America/Mexico_City">
+                                <div class="input-hint">Ejemplos: America/Mexico_City, America/Los_Angeles, Europe/Madrid, auto</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_archive_delay" onchange="toggleField('archive_delay_fields')">
+                            <label for="enable_archive_delay">Retraso antes de archivar (ARCHIVE_DELAY)</label>
+                        </div>
+                        <div class="field-description">
+                            Por defecto hay un retraso de 20 segundos entre conectar al WiFi e iniciar el archivo de clips grabados
+                        </div>
+                        <div class="field-inputs" id="archive_delay_fields">
+                            <div class="input-row">
+                                <label>Retraso (segundos):</label>
+                                <input type="number" id="ARCHIVE_DELAY" value="20" placeholder="20">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_hostname" onchange="toggleField('hostname_fields')">
+                            <label for="enable_hostname">Nombre de host personalizado (TESLAUSB_HOSTNAME)</label>
+                        </div>
+                        <div class="field-description">
+                            Por defecto es "teslausb"
+                        </div>
+                        <div class="field-inputs" id="hostname_fields">
+                            <div class="input-row">
+                                <label>Hostname:</label>
+                                <input type="text" id="TESLAUSB_HOSTNAME" placeholder="teslausb-Model3">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_ssh_key" onchange="toggleField('ssh_key_fields')">
+                            <label for="enable_ssh_key">Clave pública SSH para root (SSH_ROOT_PUBLIC_KEY)</label>
+                        </div>
+                        <div class="field-description">
+                            Define una clave pública SSH que puede ser utilizada para conectarse vía SSH a teslausb como root
+                        </div>
+                        <div class="field-inputs" id="ssh_key_fields">
+                            <div class="input-row">
+                                <label>Clave pública SSH:</label>
+                                <textarea id="SSH_ROOT_PUBLIC_KEY" placeholder="ssh-rsa AAAAB3NzaC1yc2EAAAADA... user@host.domain"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_ssh_disable_password" onchange="toggleField('ssh_disable_password_fields')">
+                            <label for="enable_ssh_disable_password">Deshabilitar autenticación SSH con contraseña (SSH_DISABLE_PASSWORD_AUTHENTICATION)</label>
+                        </div>
+                        <div class="field-description">
+                            Deshabilita la autenticación SSH con contraseña para todos los usuarios
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Push Notifications -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>🔔 Notificaciones Push</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="info-box">
+                        <strong>Información:</strong>
+                        <p>Las notificaciones push consisten en un título y un mensaje. Por defecto se usa TESLAUSB_HOSTNAME como título.</p>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_notification_title" onchange="toggleField('notification_title_fields')">
+                            <label for="enable_notification_title">Título personalizado de notificaciones (NOTIFICATION_TITLE)</label>
+                        </div>
+                        <div class="field-inputs" id="notification_title_fields">
+                            <div class="input-row">
+                                <label>Título:</label>
+                                <input type="text" id="NOTIFICATION_TITLE" placeholder="TeslaUSB Notification">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Signal -->
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_signal" onchange="toggleField('signal_fields')">
+                            <label for="enable_signal">Signal (SIGNAL_ENABLED)</label>
+                        </div>
+                        <div class="field-inputs" id="signal_fields">
+                            <div class="input-row">
+                                <label>URL de Signal:</label>
+                                <input type="text" id="SIGNAL_URL" placeholder="http://<url>:8080">
+                            </div>
+                            <div class="input-row">
+                                <label>Número de origen (con código de país):</label>
+                                <input type="text" id="SIGNAL_FROM_NUM" placeholder="country_code_and_number_configured_with_signal">
+                            </div>
+                            <div class="input-row">
+                                <label>Número de destino (con código de país):</label>
+                                <input type="text" id="SIGNAL_TO_NUM" placeholder="country_code_and_number_configured_with_signal">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pushover -->
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_pushover" onchange="toggleField('pushover_fields')">
+                            <label for="enable_pushover">Pushover (PUSHOVER_ENABLED)</label>
+                        </div>
+                        <div class="field-inputs" id="pushover_fields">
+                            <div class="input-row">
+                                <label>User Key:</label>
+                                <input type="text" id="PUSHOVER_USER_KEY" placeholder="user_key">
+                            </div>
+                            <div class="input-row">
+                                <label>App Key:</label>
+                                <input type="text" id="PUSHOVER_APP_KEY" placeholder="app_key">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gotify -->
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_gotify" onchange="toggleField('gotify_fields')">
+                            <label for="enable_gotify">Gotify (GOTIFY_ENABLED)</label>
+                        </div>
+                        <div class="field-inputs" id="gotify_fields">
+                            <div class="input-row">
+                                <label>Dominio Gotify:</label>
+                                <input type="text" id="GOTIFY_DOMAIN" placeholder="https://gotify.domain.com">
+                            </div>
+                            <div class="input-row">
+                                <label>App Token:</label>
+                                <input type="text" id="GOTIFY_APP_TOKEN" placeholder="put_your_token_here">
+                            </div>
+                            <div class="input-row">
+                                <label>Prioridad:</label>
+                                <input type="number" id="GOTIFY_PRIORITY" value="5" placeholder="5">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- IFTTT -->
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_ifttt" onchange="toggleField('ifttt_fields')">
+                            <label for="enable_ifttt">IFTTT (IFTTT_ENABLED)</label>
+                        </div>
+                        <div class="field-inputs" id="ifttt_fields">
+                            <div class="input-row">
+                                <label>Nombre del evento:</label>
+                                <input type="text" id="IFTTT_EVENT_NAME" placeholder="put_your_event_name_here">
+                            </div>
+                            <div class="input-row">
+                                <label>Key:</label>
+                                <input type="text" id="IFTTT_KEY" placeholder="put_your_key_here">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Discord -->
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_discord" onchange="toggleField('discord_fields')">
+                            <label for="enable_discord">Discord (DISCORD_ENABLED)</label>
+                        </div>
+                        <div class="field-inputs" id="discord_fields">
+                            <div class="input-row">
+                                <label>Webhook URL:</label>
+                                <input type="text" id="DISCORD_WEBHOOK_URL" placeholder="put_your_webhook_url_here">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AWS SNS -->
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_sns" onchange="toggleField('sns_fields')">
+                            <label for="enable_sns">AWS SNS (SNS_ENABLED)</label>
+                        </div>
+                        <div class="field-inputs" id="sns_fields">
+                            <div class="input-row">
+                                <label>Región AWS:</label>
+                                <input type="text" id="AWS_REGION" placeholder="us-east-1">
+                            </div>
+                            <div class="input-row">
+                                <label>Access Key ID:</label>
+                                <input type="text" id="AWS_ACCESS_KEY_ID" placeholder="put_your_accesskeyid_here">
+                            </div>
+                            <div class="input-row">
+                                <label>Secret Access Key:</label>
+                                <input type="password" id="AWS_SECRET_ACCESS_KEY" placeholder="put_your_secretkey_here">
+                            </div>
+                            <div class="input-row">
+                                <label>SNS Topic ARN:</label>
+                                <input type="text" id="AWS_SNS_TOPIC_ARN" placeholder="put_your_sns_topicarn_here">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Telegram -->
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_telegram" onchange="toggleField('telegram_fields')">
+                            <label for="enable_telegram">Telegram (TELEGRAM_ENABLED)</label>
+                        </div>
+                        <div class="field-inputs" id="telegram_fields">
+                            <div class="input-row">
+                                <label>Chat ID:</label>
+                                <input type="text" id="TELEGRAM_CHAT_ID" placeholder="123456789">
+                            </div>
+                            <div class="input-row">
+                                <label>Bot Token:</label>
+                                <input type="text" id="TELEGRAM_BOT_TOKEN" placeholder="bot123456789:abcdefghijklmnopqrstuvqxyz987654321">
+                            </div>
+                            <div class="field-header" style="margin-top: 15px;">
+                                <input type="checkbox" id="enable_telegram_silent" onchange="toggleField('telegram_silent_fields')">
+                                <label for="enable_telegram_silent">Notificaciones silenciosas (TELEGRAM_SILENT_NOTIFY)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Webhook -->
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_webhook" onchange="toggleField('webhook_fields')">
+                            <label for="enable_webhook">Webhook (WEBHOOK_ENABLED)</label>
+                        </div>
+                        <div class="field-inputs" id="webhook_fields">
+                            <div class="input-row">
+                                <label>Webhook URL:</label>
+                                <input type="text" id="WEBHOOK_URL" placeholder="http://domain/path">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Slack -->
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_slack" onchange="toggleField('slack_fields')">
+                            <label for="enable_slack">Slack (SLACK_ENABLED)</label>
+                        </div>
+                        <div class="field-inputs" id="slack_fields">
+                            <div class="input-row">
+                                <label>Webhook URL:</label>
+                                <input type="text" id="SLACK_WEBHOOK_URL" placeholder="http://domain/path">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Matrix -->
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_matrix" onchange="toggleField('matrix_fields')">
+                            <label for="enable_matrix">Matrix (MATRIX_ENABLED)</label>
+                        </div>
+                        <div class="field-inputs" id="matrix_fields">
+                            <div class="input-row">
+                                <label>URL del servidor:</label>
+                                <input type="text" id="MATRIX_SERVER_URL" placeholder="https://matrix.org">
+                            </div>
+                            <div class="input-row">
+                                <label>Usuario:</label>
+                                <input type="text" id="MATRIX_USERNAME" placeholder="put_your_matrix_username_here">
+                            </div>
+                            <div class="input-row">
+                                <label>Contraseña:</label>
+                                <input type="password" id="MATRIX_PASSWORD" placeholder="put_your_matrix_password_here">
+                            </div>
+                            <div class="input-row">
+                                <label>Room ID:</label>
+                                <input type="text" id="MATRIX_ROOM" placeholder="put_the_matrix_target_room_id_here">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Shell Commands -->
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_notification_command" onchange="toggleField('notification_command_fields')">
+                            <label for="enable_notification_command">Comandos Shell (NOTIFICATION_COMMAND_ENABLED)</label>
+                        </div>
+                        <div class="field-inputs" id="notification_command_fields">
+                            <div class="input-row">
+                                <label>Comando al iniciar:</label>
+                                <input type="text" id="NOTIFICATION_COMMAND_START" placeholder="ssh root@remote-server 'command args'">
+                            </div>
+                            <div class="input-row">
+                                <label>Comando al finalizar:</label>
+                                <input type="text" id="NOTIFICATION_COMMAND_FINISH" placeholder="ssh root@remote-server 'command args'">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trigger Files -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>📁 Archivos Trigger (tesla_dashcam)</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="info-box">
+                        <strong>Soporte para tesla_dashcam / Archivos Trigger:</strong>
+                        <p>Descomenta cualquier TRIGGER_FILE_xxxxx para crear archivo(s) trigger en el directorio de archivo para el tipo de clip listado después de que todos los clips hayan sido transferidos.<br><br>
+                        Por ejemplo: TRIGGER_FILE_SAVED=ARCHIVE_UPLOADED crearía un archivo en $ARCHIVE_BASE/SavedClips/ARCHIVE_UPLOADED.<br><br>
+                        TRIGGER_FILE_ANY creará un archivo trigger en $ARCHIVE_BASE. Esto hará que tesla_dashcam procese tanto SavedClips como SentryClips cuando cualquiera cambie.<br><br>
+                        Útil si usas <a href="https://github.com/ehendrix23/tesla_dashcam" target="_blank">tesla_dashcam</a> para procesar clips.<br><br>
+                        Puedes modificar el valor a tu nombre de archivo trigger deseado. Recuerda alterar tu nombre de archivo trigger de tesla_dashcam para que coincida.</p>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_trigger_saved" onchange="toggleField('trigger_saved_fields')">
+                            <label for="enable_trigger_saved">Trigger para SavedClips (TRIGGER_FILE_SAVED)</label>
+                        </div>
+                        <div class="field-inputs" id="trigger_saved_fields">
+                            <div class="input-row">
+                                <label>Nombre del archivo trigger:</label>
+                                <input type="text" id="TRIGGER_FILE_SAVED" placeholder="ARCHIVE_UPLOADED">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_trigger_sentry" onchange="toggleField('trigger_sentry_fields')">
+                            <label for="enable_trigger_sentry">Trigger para SentryClips (TRIGGER_FILE_SENTRY)</label>
+                        </div>
+                        <div class="field-inputs" id="trigger_sentry_fields">
+                            <div class="input-row">
+                                <label>Nombre del archivo trigger:</label>
+                                <input type="text" id="TRIGGER_FILE_SENTRY" placeholder="ARCHIVE_UPLOADED">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_trigger_recent" onchange="toggleField('trigger_recent_fields')">
+                            <label for="enable_trigger_recent">Trigger para RecentClips (TRIGGER_FILE_RECENT)</label>
+                        </div>
+                        <div class="field-inputs" id="trigger_recent_fields">
+                            <div class="input-row">
+                                <label>Nombre del archivo trigger:</label>
+                                <input type="text" id="TRIGGER_FILE_RECENT" placeholder="ARCHIVE_UPLOADED">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_trigger_any" onchange="toggleField('trigger_any_fields')">
+                            <label for="enable_trigger_any">Trigger para cualquier tipo (TRIGGER_FILE_ANY)</label>
+                        </div>
+                        <div class="field-description">
+                            Crea un trigger en la raíz para procesar SavedClips y SentryClips cuando cualquiera cambie
+                        </div>
+                        <div class="field-inputs" id="trigger_any_fields">
+                            <div class="input-row">
+                                <label>Nombre del archivo trigger:</label>
+                                <input type="text" id="TRIGGER_FILE_ANY" placeholder="ARCHIVE_UPLOADED">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Keep Car Awake -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>⚡ Mantener Auto Despierto (Keep Car Awake)</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="warning-box">
+                        <strong>¡¡¡MUY IMPORTANTE - CAMBIOS IMPORTANTES PARA MANTENER AUTO DESPIERTO!!!</strong>
+                        <p>El firmware reciente del auto ha desactivado los puertos de energía cuando el vehículo entra en estado de sleep. Esto puede obstaculizar la completación del proceso de archivo por TeslaUSB. Tesla posteriormente introdujo la función "Keep Accessory Power On", pero NO es aplicable al puerto de datos utilizado por Dashcam y TeslaUSB.<br><br>
+                        Se han implementado varios métodos: TeslaFi, Tessie, Bluetooth Low Energy (BLE) y Webhooks.<br><br>
+                        <strong>¡SOLO ELIGE UN MÉTODO!</strong> No mezcles TeslaFi con Tessie, o BLE con cualquiera de los servicios.</p>
+                    </div>
+
+                    <div class="info-box">
+                        <strong>Ventajas y desventajas de cada método:</strong>
+                        <p><strong>BLE:</strong><br>
+                        ++ Conexión directa al auto; sin límites<br>
+                        - Complejidad adicional para configurar inicialmente<br>
+                        - Algunas vulnerabilidades de seguridad<br>
+                        * Ver wiki de Hardware para notas de soporte de hardware/software BLE<br><br>
+                        
+                        <strong>TeslaFi/Tessie:</strong><br>
+                        + Sencillo de configurar inicialmente<br>
+                        + Monitoreo y gestión remota<br>
+                        - Tessie: Si no usas Sentry Mode, necesitas mantener conexión WiFi/internet consistente<br>
+                        - Algunas vulnerabilidades de seguridad<br>
+                        - Requiere servicio pagado de terceros<br><br>
+                        
+                        <strong>Webhook:</strong><br>
+                        + No requiere que teslausb almacene credenciales que puedan controlar directamente tu vehículo<br>
+                        - Requiere otro servicio como Home Assistant configurado para recibir webhooks</p>
+                    </div>
+
+                    <div class="info-box">
+                        <strong>Casos de uso (elige 1):</strong>
+                        <p><strong>Caso 1:</strong> [Compatible con TeslaFi, Tessie, BLE o Webhook]<br>
+                        Quieres Sentry Mode encendido en todos lados excepto cuando estás estacionado en casa. Al llegar a casa, Sentry Mode ya estará ON para alimentar TeslaUSB durante el archivo. Una vez completado, se enviará un comando para apagar Sentry Mode.<br>
+                        <em>>>> IMPORTANTE: Verifica que tu Sentry Mode en el auto esté en ON, y 'Exclude Home' esté DESMARCADO.</em><br><br>
+                        
+                        <strong>Caso 2:</strong> [Compatible con TeslaFi, Tessie, BLE o Webhook]<br>
+                        NO quieres Sentry Mode encendido en ningún lugar, excepto al archivar. Al llegar a casa, TeslaUSB enviará un comando para encender Sentry Mode. Una vez completado el archivo, se enviará comando para apagar Sentry Mode.<br>
+                        <em>>>> IMPORTANTE: Verifica que tu Sentry Mode en el auto esté en OFF.</em><br><br>
+                        
+                        <strong>Caso 3:</strong> [Compatible con Tessie, BLE o Webhook]<br>
+                        Sentry Mode NO es usado por TeslaUSB. En su lugar, se envía un comando periódico al auto para mantenerlo despierto.</p>
+                    </div>
+
+                    <div class="warning-box">
+                        <strong>AVISO DE SEGURIDAD:</strong>
+                        <p>Los 3 métodos tienen algún nivel de implicaciones de seguridad. Para BLE, el par de claves se almacena en el dispositivo. Para TeslaFi/Tessie, el token de acceso API está en el archivo de configuración.<br><br>
+                        <strong>Buenas prácticas de seguridad:</strong><br>
+                        * Cambia tus contraseñas de usuario TeslaUSB (pi y root)<br>
+                        * Configura usuario/contraseña para el AP de TeslaUSB (si está habilitado)<br>
+                        * Habilita pin-to-drive de Tesla<br>
+                        * Si tu TeslaUSB ha sido comprometido, cambia inmediatamente tu contraseña de Tesla.com</p>
+                    </div>
+
+                    <!-- Sentry Case Selection -->
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_sentry_case" onchange="toggleField('sentry_case_fields')">
+                            <label for="enable_sentry_case">Configurar caso de Sentry Mode (SENTRY_CASE)</label>
+                        </div>
+                        <div class="field-inputs" id="sentry_case_fields">
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="sentry_case" value="1">
+                                    Caso 1 (Sentry ON excepto casa)
+                                </label>
+                                <label>
+                                    <input type="radio" name="sentry_case" value="2">
+                                    Caso 2 (Sentry OFF, solo para archivo)
+                                </label>
+                                <label>
+                                    <input type="radio" name="sentry_case" value="3">
+                                    Caso 3 (Sin Sentry, comandos periódicos)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TeslaFi -->
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_teslafi" onchange="toggleField('teslafi_fields'); uncheckOthers('enable_teslafi', ['enable_tessie', 'enable_tesla_ble', 'enable_keep_awake_webhook'])">
+                            <label for="enable_teslafi">TeslaFi (TESLAFI_API_TOKEN)</label>
+                        </div>
+                        <div class="field-description">
+                            Para TeslaFi, proporciona tu token API aquí
+                        </div>
+                        <div class="field-inputs" id="teslafi_fields">
+                            <div class="info-box">
+                                <strong>Cómo generar Tokens API de TeslaFi:</strong>
+                                <p>1. Inicia sesión en tu cuenta TeslaFi<br>
+                                2. Navega a Settings → Tesla API → API Token (tab)<br><br>
+                                <strong>Habilitar Comando API de TeslaFi:</strong><br>
+                                1. Navega a Settings → Tesla API → Commands (tab)<br>
+                                2. Verifica que el comando 'Sentry Mode' esté marcado (habilitado)<br>
+                                3. Para seguridad adicional, recomienda deshabilitar comando 'Unlock'</p>
+                            </div>
+                            <div class="input-row">
+                                <label>API Token de TeslaFi:</label>
+                                <input type="text" id="TESLAFI_API_TOKEN" placeholder="YOUR_TESLAFI_API_TOKEN_GOES_HERE">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tessie -->
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_tessie" onchange="toggleField('tessie_fields'); uncheckOthers('enable_tessie', ['enable_teslafi', 'enable_tesla_ble', 'enable_keep_awake_webhook'])">
+                            <label for="enable_tessie">Tessie (TESSIE_API_TOKEN, TESSIE_VIN)</label>
+                        </div>
+                        <div class="field-description">
+                            Para Tessie, proporciona tu token API y VIN del vehículo
+                        </div>
+                        <div class="field-inputs" id="tessie_fields">
+                            <div class="info-box">
+                                <strong>Cómo generar Tokens API de Tessie:</strong>
+                                <p>1. Inicia sesión en tu cuenta Tessie<br>
+                                2. Navega a Settings → Developer API → Generate access token</p>
+                            </div>
+                            <div class="input-row">
+                                <label>API Token de Tessie:</label>
+                                <input type="text" id="TESSIE_API_TOKEN" placeholder="YOUR_TESSIE_API_TOKEN_GOES_HERE">
+                            </div>
+                            <div class="input-row">
+                                <label>VIN del vehículo:</label>
+                                <input type="text" id="TESSIE_VIN" placeholder="5YJ3E1EA4JF000001">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BLE -->
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_tesla_ble" onchange="toggleField('tesla_ble_fields'); uncheckOthers('enable_tesla_ble', ['enable_teslafi', 'enable_tessie', 'enable_keep_awake_webhook'])">
+                            <label for="enable_tesla_ble">Bluetooth Low Energy - BLE (TESLA_BLE_VIN)</label>
+                        </div>
+                        <div class="field-description">
+                            Para BLE, proporciona tu VIN del vehículo aquí
+                        </div>
+                        <div class="field-inputs" id="tesla_ble_fields">
+                            <div class="info-box">
+                                <strong>Emparejando TeslaUSB como dispositivo BLE:</strong>
+                                <p>1. Asegúrate de que el dispositivo TeslaUSB esté dentro del vehículo y encendido<br><br>
+                                2a. Desde la UI Web de TeslaUSB: Menu > Tools > Pair BLE with Car<br>
+                                2b. Alternativamente, si la UI Web no está habilitada, desde línea de comandos SSH:<br>
+                                <code>sudo /root/bin/tesla-control -ble -vin &lt;your VIN&gt; add-key-request /root/.ble/key_public.pem owner cloud_key</code><br><br>
+                                3. Poco después de iniciar el emparejamiento, se muestra una solicitud para una tarjeta de clave autorizada. Por favor toca una tarjeta de clave en la consola central rápidamente y confirma en la pantalla del auto<br><br>
+                                4. Si se hace correctamente, verás una entrada "Unknown Key" (puede ser renombrada) bajo la pantalla de Locks del auto<br><br>
+                                <em>Nota: Esto NO previene que el auto se cierre, ni permite que alguien abra o conduzca el auto fácilmente. Aún se requiere una clave autorizada (tarjeta, teléfono, fob).</em></p>
+                            </div>
+                            <div class="input-row">
+                                <label>VIN del vehículo:</label>
+                                <input type="text" id="TESLA_BLE_VIN" placeholder="5YJ3E1EA4JF000001">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Webhook Keep Awake -->
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_keep_awake_webhook" onchange="toggleField('keep_awake_webhook_fields'); uncheckOthers('enable_keep_awake_webhook', ['enable_teslafi', 'enable_tessie', 'enable_tesla_ble'])">
+                            <label for="enable_keep_awake_webhook">Webhook Keep Awake (KEEP_AWAKE_WEBHOOK_URL)</label>
+                        </div>
+                        <div class="field-description">
+                            Para webhook, proporciona la URL del webhook que recibirá mensajes de despertar
+                        </div>
+                        <div class="field-inputs" id="keep_awake_webhook_fields">
+                            <div class="info-box">
+                                <strong>Información del Webhook:</strong>
+                                <p>Se enviará un mensaje webhook con un cuerpo JSON. La forma del JSON será: { "awake_command": "&lt;command&gt;" }<br><br>
+                                <strong>Comandos que se enviarán a este webhook:</strong><br>
+                                1. start: Enviado cuando SENTRY_CASE=2 y el proceso de archivo inicia<br>
+                                2. stop: Enviado cuando SENTRY_CASE=1 o 2 y el proceso de archivo termina<br>
+                                3. nudge: Enviado cuando SENTRY_CASE=3 y el proceso de archivo está en curso</p>
+                            </div>
+                            <div class="input-row">
+                                <label>Webhook URL:</label>
+                                <input type="text" id="KEEP_AWAKE_WEBHOOK_URL" placeholder="http://domain/path">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-box" style="margin-top: 20px;">
+                        <strong>Otras formas de mantener el puerto de datos energizado:</strong>
+                        <p>Puedes manualmente encender Sentry Mode o Camp Mode desde la App de Tesla. Sin embargo, ninguna es una gran solución ya que mantienen el auto despierto indefinidamente, consumiendo innecesariamente la batería de alto voltaje.<br><br>
+                        Por esa razón, es buena idea configurar mecanismos de notificación (secciones previas) para que sepas cuándo apagar manualmente Sentry/Camp Mode.<br><br>
+                        Otra alternativa es usar un power bank o UPS hat para mantener TeslaUSB energizado independientemente del estado de energía de los puertos USB del auto. Ver el wiki de TeslaUSB para más información.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Temperature Monitor -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>🌡️ Monitor de Temperatura</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="info-box">
+                        <strong>Monitor de Temperatura:</strong>
+                        <p>Entender el perfil térmico de tu dispositivo es crucial para mantener rendimiento y confiabilidad. Como referencia, Raspberry Pi Foundation establece que su rango de temperatura operativa es 0°C a 85°C, y el sistema comenzará a hacer throttling del procesador cuando alcance 80°C para prevenir daño.<br><br>
+                        Anecdóticamente, otros subcomponentes pueden volverse inestables en umbrales más bajos (ej: Wi-Fi). Como mejor práctica general, mantén la temperatura bajo 70°C. Comienza a monitorear de cerca cuando regularmente alcance más de 60°C.<br><br>
+                        Descomentar cualquiera de los siguientes parámetros activará el monitoreo de temperatura de TeslaUSB, que verifica la temperatura una vez por minuto y retiene el valor máximo hasta que el dispositivo se reinicie o apague.<br><br>
+                        Los siguientes parámetros determinan cuándo se activan entradas de log y mensajes push (si están configurados). El caso de intervalo fijo solo registrará entradas, pero no enviará mensajes push, para evitar sobre-saturación.</p>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_temp_warning" onchange="toggleField('temp_warning_fields')">
+                            <label for="enable_temp_warning">Umbral de advertencia (TEMPERATURE_WARNING)</label>
+                        </div>
+                        <div class="field-description">
+                            Dos (2) umbrales de temperatura: WARNING y CAUTION. Los triggers solo dispararán una vez para reducir spam. Solo cuando la temperatura se asienta 5°C por debajo de los umbrales establecidos, se les permite disparar de nuevo. Caution generalmente se considera menos severo que Warning, pero tienes libertad de configurarlos como desees. Los valores deben ser enteros y expresados en milli-°C (ej: 68.0°C = 68000)
+                        </div>
+                        <div class="field-inputs" id="temp_warning_fields">
+                            <div class="input-row">
+                                <label>Temperatura (milli-°C):</label>
+                                <input type="number" id="TEMPERATURE_WARNING" placeholder="68000">
+                                <div class="input-hint">68000 = 68°C</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_temp_caution" onchange="toggleField('temp_caution_fields')">
+                            <label for="enable_temp_caution">Umbral de precaución (TEMPERATURE_CAUTION)</label>
+                        </div>
+                        <div class="field-inputs" id="temp_caution_fields">
+                            <div class="input-row">
+                                <label>Temperatura (milli-°C):</label>
+                                <input type="number" id="TEMPERATURE_CAUTION" placeholder="55000">
+                                <div class="input-hint">55000 = 55°C</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_temp_interval" onchange="toggleField('temp_interval_fields')">
+                            <label for="enable_temp_interval">Registro por intervalo fijo (TEMPERATURE_INTERVAL)</label>
+                        </div>
+                        <div class="field-description">
+                            El trigger de intervalo fijo registra (sin mensajes push) los valores instantáneos y máximos. El valor máximo se mantiene durante el período de grabación y se resetea al concluir el proceso de archivo/sincronización de música. Este trigger puede ser útil para entender mejor la actividad térmica durante el día. El valor debe ser un entero y expresado en minutos (mínimo = 1).
+                        </div>
+                        <div class="field-inputs" id="temp_interval_fields">
+                            <div class="input-row">
+                                <label>Intervalo (minutos):</label>
+                                <input type="number" id="TEMPERATURE_INTERVAL" placeholder="60">
+                                <div class="input-hint">Mínimo 1 minuto</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_temp_postarchive" checked onchange="toggleField('temp_postarchive_fields')">
+                            <label for="enable_temp_postarchive">Registrar después de archivar (TEMPERATURE_POSTARCHIVE)</label>
+                        </div>
+                        <div class="field-description">
+                            Al final de cada proceso de archivo/sincronización de música, el dispositivo típicamente corre más caliente, haciéndolo un momento ideal para capturar temperatura.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Options -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <h2>⚙️ Opciones Avanzadas</h2>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_increase_root" onchange="toggleField('increase_root_fields')">
+                            <label for="enable_increase_root">Aumentar tamaño del sistema de archivos raíz (INCREASE_ROOT_SIZE)</label>
+                        </div>
+                        <div class="field-description">
+                            Si quieres aumentar el tamaño del sistema de archivos raíz para que haya espacio extra para instalar software adicional. Esto solo funciona si la partición de backing store no ha sido creada aún (durante configuración inicial temprana), y requiere un reinicio extra. Los tamaños pueden especificarse como por ejemplo "500M" o "2G"
+                        </div>
+                        <div class="field-inputs" id="increase_root_fields">
+                            <div class="input-row">
+                                <label>Tamaño adicional:</label>
+                                <input type="text" id="INCREASE_ROOT_SIZE" placeholder="500M">
+                                <div class="input-hint">Ejemplos: 500M, 2G</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_user_packages" onchange="toggleField('user_packages_fields')">
+                            <label for="enable_user_packages">Instalar paquetes adicionales (INSTALL_USER_REQUESTED_PACKAGES)</label>
+                        </div>
+                        <div class="field-description">
+                            Si quieres que teslausb instale automáticamente algunos paquetes adicionales durante la configuración. Esto solo funciona si hay suficiente espacio libre disponible en la partición raíz. Los paquetes solicitados deben estar separados por espacios.
+                        </div>
+                        <div class="field-inputs" id="user_packages_fields">
+                            <div class="input-row">
+                                <label>Paquetes (separados por espacio):</label>
+                                <input type="text" id="INSTALL_USER_REQUESTED_PACKAGES" placeholder="iftop mosh sysstat">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_vm_params" onchange="toggleField('vm_params_fields')">
+                            <label for="enable_vm_params">Parámetros VM/CPU personalizados</label>
+                        </div>
+                        <div class="field-description">
+                            Si quieres usar diferentes parámetros vm/cpu. Deja comentado para usar los defaults de teslausb, o configúralo como 'default' para usar los defaults del sistema. Ver <a href="https://www.kernel.org/doc/Documentation/sysctl/vm.txt" target="_blank">documentación vm.txt</a> y <a href="https://www.kernel.org/doc/Documentation/cpu-freq/governors.txt" target="_blank">documentación governors.txt</a> para detalles.
+                        </div>
+                        <div class="field-inputs" id="vm_params_fields">
+                            <div class="input-row">
+                                <label>DIRTY_BACKGROUND_BYTES:</label>
+                                <input type="number" id="DIRTY_BACKGROUND_BYTES" placeholder="65536">
+                            </div>
+                            <div class="input-row">
+                                <label>DIRTY_RATIO:</label>
+                                <input type="number" id="DIRTY_RATIO" placeholder="80">
+                            </div>
+                            <div class="input-row">
+                                <label>CPU_GOVERNOR:</label>
+                                <input type="text" id="CPU_GOVERNOR" placeholder="conservative">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_repo" onchange="toggleField('repo_fields')">
+                            <label for="enable_repo">Repositorio personalizado (REPO)</label>
+                        </div>
+                        <div class="field-description">
+                            Descomenta y cambia si quieres que los scripts de configuración se descarguen de un repo diferente a github.com/marcone/teslausb
+                        </div>
+                        <div class="field-inputs" id="repo_fields">
+                            <div class="input-row">
+                                <label>Repositorio GitHub:</label>
+                                <input type="text" id="REPO" placeholder="marcone">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-header">
+                            <input type="checkbox" id="enable_branch" onchange="toggleField('branch_fields')">
+                            <label for="enable_branch">Rama personalizada (BRANCH)</label>
+                        </div>
+                        <div class="field-description">
+                            Descomenta y cambia si quieres una rama diferente a main-dev
+                        </div>
+                        <div class="field-inputs" id="branch_fields">
+                            <div class="input-row">
+                                <label>Rama:</label>
+                                <input type="text" id="BRANCH" placeholder="main-dev">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="generateConfig()">📥 Generar Configuración</button>
+            <button class="btn btn-secondary" onclick="resetForm()">🔄 Reiniciar Formulario</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleSection(header) {
+            const content = header.nextElementSibling;
+            const toggle = header.querySelector('.toggle');
+            
+            if (content.classList.contains('active')) {
+                content.classList.remove('active');
+                toggle.textContent = '▼';
+            } else {
+                content.classList.add('active');
+                toggle.textContent = '▲';
+            }
+        }
+
+        function toggleField(fieldId) {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.classList.toggle('active');
+            }
+        }
+
+        function uncheckOthers(keepId, otherIds) {
+            const keepCheckbox = document.getElementById(keepId);
+            if (keepCheckbox.checked) {
+                otherIds.forEach(id => {
+                    const checkbox = document.getElementById(id);
+                    if (checkbox && checkbox.checked) {
+                        checkbox.checked = false;
+                        const fieldId = id.replace('enable_', '') + '_fields';
+                        const field = document.getElementById(fieldId);
+                        if (field) {
+                            field.classList.remove('active');
+                        }
+                    }
+                });
+            }
+        }
+
+        function generateConfig() {
+            let config = `#####################################################################
+# SAMPLE CONFIGURATION FILE FOR TESLAUSB Pi Setup
+#
+# Generado con TeslaUSB Config Generator
+# Fecha: ${new Date().toLocaleString('es-MX')}
+# Archivo de ejemplo original: https://bit.ly/teslausbconfig
+#
+######################################################################
+
+`;
+
+            // WiFi Setup
+            config += `# Wifi setup information.\n`;
+            config += `# You do not need to set these variables if networking is already configured\n`;
+            config += `# and you ran the "install.sh" script.\n`;
+            config += `# Note that some devices, like Raspberry Pi Zero W, only support 2.4 GHz wifi.\n`;
+            if (document.getElementById('enable_wifi').checked) {
+                config += `export SSID='${document.getElementById('SSID').value}'\n`;
+                config += `export WIFIPASS='${document.getElementById('WIFIPASS').value}'\n\n`;
+            } else {
+                config += `#export SSID='your_ssid'\n`;
+                config += `#export WIFIPASS='your_pass'\n\n`;
+            }
+
+            // Archive System - CIFS
+            config += `# Variables for CIFS (Windows/Mac file sharing) archiving.\n`;
+            config += `# If you want to use rsync, rclone, or NFS, delete or comment out this section\n`;
+            config += `# and uncomment the rsync or rclone section below.\n`;
+            if (document.getElementById('enable_cifs').checked) {
+                config += `export ARCHIVE_SYSTEM=cifs\n`;
+                config += `export ARCHIVE_SERVER=${document.getElementById('ARCHIVE_SERVER_cifs').value}\n`;
+                config += `export SHARE_NAME='${document.getElementById('SHARE_NAME').value}'\n`;
+                config += `export SHARE_USER=${document.getElementById('SHARE_USER').value}\n`;
+                config += `export SHARE_PASSWORD='${document.getElementById('SHARE_PASSWORD').value}'\n`;
+                config += `# the cifs options below usually don't need to be specified\n`;
+                
+                if (document.getElementById('enable_cifs_advanced').checked) {
+                    if (document.getElementById('SHARE_DOMAIN').value) {
+                        config += `export SHARE_DOMAIN=${document.getElementById('SHARE_DOMAIN').value}\n`;
+                    } else {
+                        config += `# export SHARE_DOMAIN=domain\n`;
+                    }
+                    if (document.getElementById('CIFS_VERSION').value) {
+                        config += `export CIFS_VERSION="${document.getElementById('CIFS_VERSION').value}"\n`;
+                    } else {
+                        config += `# export CIFS_VERSION="3.0"\n`;
+                    }
+                    if (document.getElementById('CIFS_SEC').value) {
+                        config += `export CIFS_SEC="${document.getElementById('CIFS_SEC').value}"\n`;
+                    } else {
+                        config += `# export CIFS_SEC="ntlm"\n`;
+                    }
+                } else {
+                    config += `# export SHARE_DOMAIN=domain\n`;
+                    config += `# export CIFS_VERSION="3.0"\n`;
+                    config += `# export CIFS_SEC="ntlm"\n`;
+                }
+                config += `\n`;
+            } else {
+                config += `#export ARCHIVE_SYSTEM=cifs\n`;
+                config += `#export ARCHIVE_SERVER=your_archive_name_or_ip\n`;
+                config += `#export SHARE_NAME='your_archive_share/optional_path_on_share'\n`;
+                config += `#export SHARE_USER=username\n`;
+                config += `#export SHARE_PASSWORD='password'\n`;
+                config += `# the cifs options below usually don't need to be specified\n`;
+                config += `# export SHARE_DOMAIN=domain\n`;
+                config += `# export CIFS_VERSION="3.0"\n`;
+                config += `# export CIFS_SEC="ntlm"\n\n`;
+            }
+
+            // Archive System - rsync
+            config += `# Variables for rsync archiving\n`;
+            config += `# For instructions setting up SSH Public Key authentication, view:\n`;
+            config += `# https://github.com/marcone/teslausb/blob/main-dev/doc/SetupRSync.md#step-1-authentication\n`;
+            if (document.getElementById('enable_rsync').checked) {
+                config += `export ARCHIVE_SYSTEM=rsync\n`;
+                config += `export RSYNC_USER=${document.getElementById('RSYNC_USER').value}\n`;
+                config += `export RSYNC_SERVER=${document.getElementById('RSYNC_SERVER').value}\n`;
+                config += `export RSYNC_PATH=${document.getElementById('RSYNC_PATH').value}\n\n`;
+            } else {
+                config += `#export ARCHIVE_SYSTEM=rsync\n`;
+                config += `#export RSYNC_USER=username\n`;
+                config += `#export RSYNC_SERVER=hostname_or_ip\n`;
+                config += `#export RSYNC_PATH=path_on_server\n\n`;
+            }
+
+            // Archive System - rclone
+            config += `# Variables for rclone archiving\n`;
+            config += `# If you are using rclone to archive to a local (non-cloud) server,\n`;
+            config += `# you may want to set the ARCHIVE_SERVER variable to the name or\n`;
+            config += `# ip of you local server instead.\n`;
+            if (document.getElementById('enable_rclone').checked) {
+                config += `export ARCHIVE_SYSTEM=rclone\n`;
+                config += `export ARCHIVE_SERVER=${document.getElementById('ARCHIVE_SERVER_rclone').value}\n`;
+                config += `export RCLONE_DRIVE="${document.getElementById('RCLONE_DRIVE').value}"\n`;
+                config += `export RCLONE_PATH="${document.getElementById('RCLONE_PATH').value}"\n`;
+                config += `# The following is optional\n`;
+                if (document.getElementById('enable_rclone_flags').checked && document.getElementById('RCLONE_FLAGS').value) {
+                    config += `export RCLONE_FLAGS=${document.getElementById('RCLONE_FLAGS').value}\n\n`;
+                } else {
+                    config += `#export RCLONE_FLAGS=()\n\n`;
+                }
+            } else {
+                config += `#export ARCHIVE_SYSTEM=rclone\n`;
+                config += `#export ARCHIVE_SERVER=8.8.8.8\n`;
+                config += `#export RCLONE_DRIVE="remotename"\n`;
+                config += `#export RCLONE_PATH="remotepathname"\n`;
+                config += `# The following is optional\n`;
+                config += `#export RCLONE_FLAGS=()\n\n`;
+            }
+
+            // Archive System - NFS
+            config += `# Variables for NFS archiving\n`;
+            config += `# Note: SHARE_NAME must be the exact export path on the NAS (e.g. /volume1/TeslaCam)\n`;
+            if (document.getElementById('enable_nfs').checked) {
+                config += `export ARCHIVE_SYSTEM=nfs\n`;
+                config += `export ARCHIVE_SERVER=${document.getElementById('ARCHIVE_SERVER_nfs').value}\n`;
+                config += `export SHARE_NAME='${document.getElementById('SHARE_NAME_nfs').value}'\n\n`;
+            } else {
+                config += `#export ARCHIVE_SYSTEM=nfs\n`;
+                config += `#export ARCHIVE_SERVER=hostname_or_ip\n`;
+                config += `#export SHARE_NAME='/volume1/TeslaCam'\n\n`;
+            }
+
+            // Data Drive
+            config += `# The DATA_DRIVE option (formerly USB_DRIVE) is used to specify that you want\n`;
+            config += `# to store recordings on a different drive than the boot drive. If you don't\n`;
+            config += `# plan on using an sd card at all (i.e. you are both booting from and storing\n`;
+            config += `# recordings on the USB drive), or are ONLY using an sd card (i.e. boot from\n`;
+            config += `# and store recordings on sd card), do NOT uncommment this line.\n`;
+            config += `# This should be set to the device name of the drive, e.g. /dev/sda for a drive\n`;
+            config += `# connected to a USB port, or /dev/nvme0n1 for an onboard NVME drive.\n`;
+            config += `# NOTE: the specified drive will be wiped and repartitioned.\n`;
+            if (document.getElementById('enable_data_drive').checked) {
+                config += `export DATA_DRIVE=${document.getElementById('DATA_DRIVE').value}\n\n`;
+            } else {
+                config += `# export DATA_DRIVE=/dev/sda\n\n`;
+            }
+
+            // Snapshot Interval
+            config += `# The car normally keeps an hour worth of RecentClips, however there have been\n`;
+            config += `# reports of that amount varying by country.\n`;
+            config += `# In order to keep a continuous record of RecentClips the snapshot interval\n`;
+            config += `# should be set about 2 minutes shorter than the amount of RecentClips history\n`;
+            config += `# the car keeps. The following adjusts the capture interval for cases where the\n`;
+            config += `# car only keeps 10 minutes of history. Please follow your local regulations\n`;
+            config += `# when uncommenting and/or adjusting this setting.\n`;
+            if (document.getElementById('enable_snapshot_interval').checked) {
+                config += `export SNAPSHOT_INTERVAL=${document.getElementById('SNAPSHOT_INTERVAL').value} # this number is in seconds\n\n`;
+            } else {
+                config += `# export SNAPSHOT_INTERVAL=480 # this number is in seconds\n\n`;
+            }
+
+            // Archive clips options
+            config += `# Uncomment this to archive RecentClips in addition to SavedClips, SentryClips\n`;
+            config += `# and track mode clips.\n`;
+            if (document.getElementById('enable_archive_recentclips').checked) {
+                config += `export ARCHIVE_RECENTCLIPS=true\n\n`;
+            } else {
+                config += `#export ARCHIVE_RECENTCLIPS=true\n\n`;
+            }
+
+            config += `# SavedClips, SentryClips and track mode clips are archived by default, but\n`;
+            config += `# you can turn that off by uncommenting the settings below\n`;
+            if (document.getElementById('enable_disable_savedclips').checked) {
+                config += `export ARCHIVE_SAVEDCLIPS=false\n`;
+            } else {
+                config += `#export ARCHIVE_SAVEDCLIPS=false\n`;
+            }
+
+            if (document.getElementById('enable_disable_sentryclips').checked) {
+                config += `export ARCHIVE_SENTRYCLIPS=false\n`;
+            } else {
+                config += `#export ARCHIVE_SENTRYCLIPS=false\n`;
+            }
+
+            if (document.getElementById('enable_disable_trackmodeclips').checked) {
+                config += `export ARCHIVE_TRACKMODECLIPS=false\n\n`;
+            } else {
+                config += `#export ARCHIVE_TRACKMODECLIPS=false\n\n`;
+            }
+
+            // Storage sizes
+            config += `# Notes on sd card and image sizes:\n`;
+            config += `#   * A 128 GB or larger sd card (or USB drive, when using Pi4) is recommended.\n`;
+            config += `#     The minimum supported size is 64 GB.\n`;
+            config += `#   * The setup script will keep a fixed 6 GB of space in reserve regardless of\n`;
+            config += `#     sd card size.\n`;
+            config += `#   * CAM_SIZE should generally be somewhat small, 40G is recommended, unless you\n`;
+            config += `#     plan on accumulating a lot of footage between archive operations, in which\n`;
+            config += `#     case you should increase the value (an hour of recordings, or 6 Sentry\n`;
+            config += `#     events, is about 7-10 GB of data, depending on the model year of the car).\n`;
+            config += `#   * MUSIC_SIZE should be large enough to hold your music library, obviously.\n`;
+            config += `#   * If no music size is specified, no music drive will be created.\n`;
+            config += `#   * If no lightshow size is specified, no lightshow drive will be created.\n`;
+            config += `#   * If no boombox size is specified, no boombox drive will be created.\n`;
+            
+            if (document.getElementById('enable_cam_size').checked) {
+                config += `export CAM_SIZE=${document.getElementById('CAM_SIZE').value}\n`;
+            } else {
+                config += `#export CAM_SIZE=40G\n`;
+            }
+
+            if (document.getElementById('enable_music_size').checked) {
+                config += `export MUSIC_SIZE=${document.getElementById('MUSIC_SIZE').value}\n`;
+            } else {
+                config += `#export MUSIC_SIZE=4G\n`;
+            }
+
+            if (document.getElementById('enable_lightshow_size').checked) {
+                config += `export LIGHTSHOW_SIZE=${document.getElementById('LIGHTSHOW_SIZE').value}\n`;
+            } else {
+                config += `#export LIGHTSHOW_SIZE=1G\n`;
+            }
+
+            if (document.getElementById('enable_boombox_size').checked) {
+                config += `export BOOMBOX_SIZE=${document.getElementById('BOOMBOX_SIZE').value}\n\n`;
+            } else {
+                config += `#export BOOMBOX_SIZE=100M\n\n`;
+            }
+
+            // Music share
+            config += `# If you want to automatically copy music from a CIFS share every time\n`;
+            config += `# the Pi connects to wifi, set the following variable. The share is\n`;
+            config += `# assumed to exist on the same server as the archive share. It can\n`;
+            config += `# be the same share as the share used for backing up recordings, but\n`;
+            config += `# the folder needs to be different.\n`;
+            if (document.getElementById('enable_music_share').checked) {
+                config += `export MUSIC_SHARE_NAME=${document.getElementById('MUSIC_SHARE_NAME').value}\n\n`;
+            } else {
+                config += `# export MUSIC_SHARE_NAME=your_music_share/music_folder\n\n`;
+            }
+
+            // ExFAT
+            config += `# Uncomment to use ExFAT filesystem instead of FAT32.\n`;
+            config += `# ExFAT is the filesystem used by Tesla when the drive is formatted in the car.\n`;
+            config += `# Using ExFAT is not recommended for the TeslaUSB prebuilt image, as it is\n`;
+            config += `# based on an older kernel that has no TRIM support for ExFAT.\n`;
+            if (document.getElementById('enable_use_exfat').checked) {
+                config += `export USE_EXFAT=true\n\n`;
+            } else {
+                config += `# export USE_EXFAT=true\n\n`;
+            }
+
+
+            // Samba
+            config += `# Uncomment to enable a Samba/CIFS server that makes the recordings available\n`;
+            config += `# as a network share.\n`;
+            config += `# This is obsolete/deprecated, as you can now access recordings via TeslaUSB's\n`;
+            config += `# web interface.\n`;
+            if (document.getElementById('enable_samba').checked) {
+                config += `export SAMBA_ENABLED=true\n`;
+                config += `# uncomment to enable guest access to the Samba server\n`;
+                if (document.getElementById('enable_samba_guest').checked) {
+                    config += `export SAMBA_GUEST=true\n\n`;
+                } else {
+                    config += `#export SAMBA_GUEST=true\n\n`;
+                }
+            } else {
+                config += `#export SAMBA_ENABLED=true\n`;
+                config += `# uncomment to enable guest access to the Samba server\n`;
+                config += `#export SAMBA_GUEST=true\n\n`;
+            }
+
+            // Access Point
+            config += `# Uncomment to enable teslausb to act as a wifi access point with the given\n`;
+            config += `# SSID, so you can access it while on the road. This should work on Raspberry Pi\n`;
+            config += `# but may not work on other devices.\n`;
+            if (document.getElementById('enable_ap').checked) {
+                config += `export AP_SSID='${document.getElementById('AP_SSID').value}'\n`;
+                config += `# Change this! The setup script will not accept the default 'password'\n`;
+                config += `# Also note that the wifi password must be at least 8 characters.\n`;
+                config += `export AP_PASS='${document.getElementById('AP_PASS').value}'\n`;
+                config += `# IP address is optional. The AP will give its clients IP addresses in the\n`;
+                config += `# x.x.x.10-254 range so make sure you don't put the AP's IP address in\n`;
+                config += `# that range.\n`;
+                if (document.getElementById('AP_IP').value) {
+                    config += `export AP_IP='${document.getElementById('AP_IP').value}'\n\n`;
+                } else {
+                    config += `#export AP_IP='192.168.66.1'\n\n`;
+                }
+            } else {
+                config += `#export AP_SSID='TESLAUSB WIFI'\n`;
+                config += `# Change this! The setup script will not accept the default 'password'\n`;
+                config += `# Also note that the wifi password must be at least 8 characters.\n`;
+                config += `#export AP_PASS='password'\n`;
+                config += `# IP address is optional. The AP will give its clients IP addresses in the\n`;
+                config += `# x.x.x.10-254 range so make sure you don't put the AP's IP address in\n`;
+                config += `# that range.\n`;
+                config += `#export AP_IP='192.168.66.1'\n\n`;
+            }
+
+            // Web Authentication
+            config += `# Uncomment if you'd like to password protect the teslausb web interface\n`;
+            config += `# WARNING: Anyone on the $SSID (and $AP_SSID if configured) wifi network can\n`;
+            config += `# freely interact with the teslausb web interface if it isn't secured!\n`;
+            if (document.getElementById('enable_web_auth').checked) {
+                config += `export WEB_USERNAME='${document.getElementById('WEB_USERNAME').value}'\n`;
+                config += `export WEB_PASSWORD='${document.getElementById('WEB_PASSWORD').value}'\n\n`;
+            } else {
+                config += `# export WEB_USERNAME='pi'\n`;
+                config += `# export WEB_PASSWORD='raspberry'\n\n`;
+            }
+
+            // Timezone
+            config += `# Uncomment this if you are using Raspberry Pi OS and want to set the time\n`;
+            config += `# zone to something other than the default 'BST' timezone.\n`;
+            config += `# If you are using Armbian then Armbian likely already set the correct time\n`;
+            config += `# zone when you first set up Armbian, and uncommenting this isn't necessary.\n`;
+            config += `# Can be an actual time zone, or "auto" to attempt automatic timezone detection\n`;
+            if (document.getElementById('enable_timezone').checked) {
+                config += `export TIME_ZONE="${document.getElementById('TIME_ZONE').value}"\n\n`;
+            } else {
+                config += `# export TIME_ZONE="America/Los_Angeles"\n\n`;
+            }
+
+            // Archive delay
+            config += `# By default there is a 20 second delay between connecting to wifi and\n`;
+            config += `# starting the archiving of recorded clips. Uncomment this to change\n`;
+            config += `# the duration of that delay\n`;
+            if (document.getElementById('enable_archive_delay').checked) {
+                config += `export ARCHIVE_DELAY=${document.getElementById('ARCHIVE_DELAY').value}\n\n`;
+            } else {
+                config += `# export ARCHIVE_DELAY=20\n\n`;
+            }
+
+            // Hostname
+            config += `# Uncomment if you want to override the default hostname of "teslausb"\n`;
+            if (document.getElementById('enable_hostname').checked) {
+                config += `export TESLAUSB_HOSTNAME=${document.getElementById('TESLAUSB_HOSTNAME').value}\n\n`;
+            } else {
+                config += `# export TESLAUSB_HOSTNAME=teslausb-Model3\n\n`;
+            }
+
+            // SSH Key
+            config += `# uncomment to define an SSH public key that can be utilized to SSH into\n`;
+            config += `# teslausb as root\n`;
+            if (document.getElementById('enable_ssh_key').checked) {
+                config += `export SSH_ROOT_PUBLIC_KEY='${document.getElementById('SSH_ROOT_PUBLIC_KEY').value}'\n\n`;
+            } else {
+                config += `# export SSH_ROOT_PUBLIC_KEY='ssh-rsa AAAAB3NzaC1yc2EAAAADA... user@host.domain'\n\n`;
+            }
+
+            // SSH disable password
+            config += `# uncoment to disable password SSH authentication for all users\n`;
+            if (document.getElementById('enable_ssh_disable_password').checked) {
+                config += `export SSH_DISABLE_PASSWORD_AUTHENTICATION=true\n\n`;
+            } else {
+                config += `# export SSH_DISABLE_PASSWORD_AUTHENTICATION=true\n\n`;
+            }
+
+            // Notification title
+            config += `# Push notifications consist of a title and a message.\n`;
+            config += `# By default TESLAUSB_HOSTNAME is used as the title, but you can\n`;
+            config += `# set a custom title by setting the following variable.\n`;
+            if (document.getElementById('enable_notification_title').checked) {
+                config += `export NOTIFICATION_TITLE="${document.getElementById('NOTIFICATION_TITLE').value}"\n\n`;
+            } else {
+                config += `# export NOTIFICATION_TITLE="TeslaUSB Notification"\n\n`;
+            }
+
+            // Notifications - Signal
+            config += `# Uncomment if setting up Signal_cli notifications\n`;
+            if (document.getElementById('enable_signal').checked) {
+                config += `export SIGNAL_ENABLED=true\n`;
+                config += `export SIGNAL_URL=${document.getElementById('SIGNAL_URL').value}\n`;
+                config += `export SIGNAL_FROM_NUM=${document.getElementById('SIGNAL_FROM_NUM').value}\n`;
+                config += `export SIGNAL_TO_NUM=${document.getElementById('SIGNAL_TO_NUM').value}\n\n`;
+            } else {
+                config += `# export SIGNAL_ENABLED=true\n`;
+                config += `# export SIGNAL_URL=http://<url>:8080\n`;
+                config += `# export SIGNAL_FROM_NUM=country_code_and_number_configured_with_signal\n`;
+                config += `# export SIGNAL_TO_NUM=country_code_and_number_configured_with_signal\n\n`;
+            }
+
+            // Pushover
+            config += `# Uncomment if setting up Pushover push notifications\n`;
+            if (document.getElementById('enable_pushover').checked) {
+                config += `export PUSHOVER_ENABLED=true\n`;
+                config += `export PUSHOVER_USER_KEY=${document.getElementById('PUSHOVER_USER_KEY').value}\n`;
+                config += `export PUSHOVER_APP_KEY=${document.getElementById('PUSHOVER_APP_KEY').value}\n\n`;
+            } else {
+                config += `# export PUSHOVER_ENABLED=true\n`;
+                config += `# export PUSHOVER_USER_KEY=user_key\n`;
+                config += `# export PUSHOVER_APP_KEY=app_key\n\n`;
+            }
+
+            // Gotify
+            config += `# Uncomment if setting up Gotify push notifications\n`;
+            if (document.getElementById('enable_gotify').checked) {
+                config += `export GOTIFY_ENABLED=true\n`;
+                config += `export GOTIFY_DOMAIN=${document.getElementById('GOTIFY_DOMAIN').value}\n`;
+                config += `export GOTIFY_APP_TOKEN=${document.getElementById('GOTIFY_APP_TOKEN').value}\n`;
+                config += `export GOTIFY_PRIORITY=${document.getElementById('GOTIFY_PRIORITY').value}\n\n`;
+            } else {
+                config += `# export GOTIFY_ENABLED=true\n`;
+                config += `# export GOTIFY_DOMAIN=https://gotify.domain.com\n`;
+                config += `# export GOTIFY_APP_TOKEN=put_your_token_here\n`;
+                config += `# export GOTIFY_PRIORITY=5\n\n`;
+            }
+
+            // IFTTT
+            config += `# Uncomment if setting up IFTTT push notifications\n`;
+            if (document.getElementById('enable_ifttt').checked) {
+                config += `export IFTTT_ENABLED=true\n`;
+                config += `export IFTTT_EVENT_NAME=${document.getElementById('IFTTT_EVENT_NAME').value}\n`;
+                config += `export IFTTT_KEY=${document.getElementById('IFTTT_KEY').value}\n\n`;
+            } else {
+                config += `# export IFTTT_ENABLED=true\n`;
+                config += `# export IFTTT_EVENT_NAME=put_your_event_name_here\n`;
+                config += `# export IFTTT_KEY=put_your_key_here\n\n`;
+            }
+
+            // Discord
+            config += `# Uncomment if setting up Discord push notifications\n`;
+            if (document.getElementById('enable_discord').checked) {
+                config += `export DISCORD_ENABLED=true\n`;
+                config += `export DISCORD_WEBHOOK_URL=${document.getElementById('DISCORD_WEBHOOK_URL').value}\n\n`;
+            } else {
+                config += `# export DISCORD_ENABLED=true\n`;
+                config += `# export DISCORD_WEBHOOK_URL=put_your_webhook_url_here\n\n`;
+            }
+
+            // AWS SNS
+            config += `# Uncomment if setting up AWS SNS notifications\n`;
+            if (document.getElementById('enable_sns').checked) {
+                config += `export SNS_ENABLED=true\n`;
+                config += `export AWS_REGION=${document.getElementById('AWS_REGION').value}\n`;
+                config += `export AWS_ACCESS_KEY_ID=${document.getElementById('AWS_ACCESS_KEY_ID').value}\n`;
+                config += `export AWS_SECRET_ACCESS_KEY=${document.getElementById('AWS_SECRET_ACCESS_KEY').value}\n`;
+                config += `export AWS_SNS_TOPIC_ARN=${document.getElementById('AWS_SNS_TOPIC_ARN').value}\n\n`;
+            } else {
+                config += `# export SNS_ENABLED=true\n`;
+                config += `# export AWS_REGION=us-east-1\n`;
+                config += `# export AWS_ACCESS_KEY_ID=put_your_accesskeyid_here\n`;
+                config += `# export AWS_SECRET_ACCESS_KEY=put_your_secretkey_here\n`;
+                config += `# export AWS_SNS_TOPIC_ARN=put_your_sns_topicarn_here\n\n`;
+            }
+
+            // Telegram
+            config += `# Uncomment if setting up Telegram notifications\n`;
+            if (document.getElementById('enable_telegram').checked) {
+                config += `export TELEGRAM_ENABLED=true\n`;
+                config += `export TELEGRAM_CHAT_ID=${document.getElementById('TELEGRAM_CHAT_ID').value}\n`;
+                config += `export TELEGRAM_BOT_TOKEN=${document.getElementById('TELEGRAM_BOT_TOKEN').value}\n`;
+                config += `export TELEGRAM_SILENT_NOTIFY=${document.getElementById('enable_telegram_silent').checked ? 'true' : 'false'}\n\n`;
+            } else {
+                config += `# export TELEGRAM_ENABLED=true\n`;
+                config += `# export TELEGRAM_CHAT_ID=123456789\n`;
+                config += `# export TELEGRAM_BOT_TOKEN=bot123456789:abcdefghijklmnopqrstuvqxyz987654321\n`;
+                config += `# export TELEGRAM_SILENT_NOTIFY=false\n\n`;
+            }
+
+            // Webhook
+            config += `# Uncomment if setting up Webhook notifications\n`;
+            if (document.getElementById('enable_webhook').checked) {
+                config += `export WEBHOOK_ENABLED=true\n`;
+                config += `export WEBHOOK_URL=${document.getElementById('WEBHOOK_URL').value}\n\n`;
+            } else {
+                config += `# export WEBHOOK_ENABLED=true\n`;
+                config += `# export WEBHOOK_URL=http://domain/path\n\n`;
+            }
+
+            // Slack
+            config += `# Uncomment if setting up Slack notifications\n`;
+            if (document.getElementById('enable_slack').checked) {
+                config += `export SLACK_ENABLED=true\n`;
+                config += `export SLACK_WEBHOOK_URL=${document.getElementById('SLACK_WEBHOOK_URL').value}\n\n`;
+            } else {
+                config += `# export SLACK_ENABLED=true\n`;
+                config += `# export SLACK_WEBHOOK_URL=http://domain/path\n\n`;
+            }
+
+            // Matrix
+            config += `# Uncomment if setting up Matrix notifications\n`;
+            if (document.getElementById('enable_matrix').checked) {
+                config += `export MATRIX_ENABLED=true\n`;
+                config += `export MATRIX_SERVER_URL=${document.getElementById('MATRIX_SERVER_URL').value}\n`;
+                config += `export MATRIX_USERNAME=${document.getElementById('MATRIX_USERNAME').value}\n`;
+                config += `export MATRIX_PASSWORD='${document.getElementById('MATRIX_PASSWORD').value}'\n`;
+                config += `export MATRIX_ROOM='${document.getElementById('MATRIX_ROOM').value}'\n\n`;
+            } else {
+                config += `# export MATRIX_ENABLED=true\n`;
+                config += `# export MATRIX_SERVER_URL=https://matrix.org\n`;
+                config += `# export MATRIX_USERNAME=put_your_matrix_username_here\n`;
+                config += `# export MATRIX_PASSWORD='put_your_matrix_password_here'\n`;
+                config += `# export MATRIX_ROOM='put_the_matrix_target_room_id_here'\n\n`;
+            }
+
+            // Shell notifications
+            config += `# Uncomment if setting up shell notifications.\n`;
+            if (document.getElementById('enable_notification_command').checked) {
+                config += `export NOTIFICATION_COMMAND_ENABLED=true\n`;
+                config += `export NOTIFICATION_COMMAND_START="${document.getElementById('NOTIFICATION_COMMAND_START').value}"\n`;
+                config += `export NOTIFICATION_COMMAND_FINISH="${document.getElementById('NOTIFICATION_COMMAND_FINISH').value}"\n\n`;
+            } else {
+                config += `# export NOTIFICATION_COMMAND_ENABLED=true\n`;
+                config += `# export NOTIFICATION_COMMAND_START="ssh root@remote-server 'command args'"\n`;
+                config += `# export NOTIFICATION_COMMAND_FINISH="ssh root@remote-server 'command args'"\n\n`;
+            }
+
+
+            // Trigger files
+            config += `# Tesla_dashcam / Trigger file support.\n`;
+            config += `# Uncomment any TRIGGER_FILE_xxxxx below to create trigger file(s) in the\n`;
+            config += `# archive directory for the listed clip type after all clips have been\n`;
+            config += `# transferred for that type.\n`;
+            config += `# e.g: export TRIGGER_FILE_SAVED=ARCHIVE_UPLOADED would create a file in\n`;
+            config += `# $ARCHIVE_BASE/SavedClips/ARCHIVE_UPLOADED.\n`;
+            config += `# Uncomment TRIGGER_FILE_ANY to create a trigger file in $ARCHIVE_BASE. This will\n`;
+            config += `# make tesla_dashcam process both SavedClips and SentryClips when either changes.\n`;
+            config += `# This is useful if using https://github.com/ehendrix23/tesla_dashcam to further\n`;
+            config += `# process clips.\n`;
+            config += `# e.g: tesla_dashcom --monitor --monitor_trigger $ARCHIVE_BASE/SavedClips/ARCHIVE_UPLOADED $ARCHIVE_BASE/SavedClips\n`;
+            config += `#\n`;
+            config += `# You may modify the value to your desired trigger filename. Remember to alter\n`;
+            config += `# your tesla_dashcam trigger filename to match.\n`;
+            config += `#.\n`;
+            if (document.getElementById('enable_trigger_saved').checked) {
+                config += `export TRIGGER_FILE_SAVED=${document.getElementById('TRIGGER_FILE_SAVED').value}\n`;
+            } else {
+                config += `# export TRIGGER_FILE_SAVED=ARCHIVE_UPLOADED\n`;
+            }
+
+            if (document.getElementById('enable_trigger_sentry').checked) {
+                config += `export TRIGGER_FILE_SENTRY=${document.getElementById('TRIGGER_FILE_SENTRY').value}\n`;
+            } else {
+                config += `# export TRIGGER_FILE_SENTRY=ARCHIVE_UPLOADED\n`;
+            }
+
+            if (document.getElementById('enable_trigger_recent').checked) {
+                config += `export TRIGGER_FILE_RECENT=${document.getElementById('TRIGGER_FILE_RECENT').value}\n`;
+            } else {
+                config += `# export TRIGGER_FILE_RECENT=ARCHIVE_UPLOADED\n`;
+            }
+
+            if (document.getElementById('enable_trigger_any').checked) {
+                config += `export TRIGGER_FILE_ANY=${document.getElementById('TRIGGER_FILE_ANY').value}\n\n`;
+            } else {
+                config += `# export TRIGGER_FILE_ANY=ARCHIVE_UPLOADED\n\n`;
+            }
+
+            // Keep car awake - LONG SECTION
+            config += `################################################################################\n`;
+            config += `# !!!!!!!!!!!!!!!!!!!!!! IMPORTANT KEEP CAR AWAKE CHANGES !!!!!!!!!!!!!!!!!!!!!!\n`;
+            config += `#\n`;
+            config += `# Recent car firmware has deactivated the power ports when the vehicle enters a\n`;
+            config += `# sleep state. This restriction can hinder the completion of the archiving\n`;
+            config += `# process by TeslaUSB. Tesla subsequently introduced the "Keep Accessory Power\n`;
+            config += `# On" feature, but is not applicable to the data port utilized by Dashcam and\n`;
+            config += `# TeslaUSB.\n`;
+            config += `#\n`;
+            config += `# In order to keep the car awake, several methods have been implemented:\n`;
+            config += `# TeslaFi, Tessie, Bluetooth Low Energy (BLE), and Webhooks. Please note that the previous\n`;
+            config += `# implementation using the (unofficial) Tesla API was removed. Tesla had\n`;
+            config += `# superseded it with their official Fleet API (a paid service for developers).\n`;
+            config += `# Consequently, TeslaFi and Tessie now enforce request rate limits. As a result,\n`;
+            config += `# the entire Keep Car Awake framework has been refactored to use considerably\n`;
+            config += `# fewer requests and now leverages Sentry Mode exclusively for TeslaFi and\n`;
+            config += `# Tessie. BLE's direct connection does not have such limit, therefore uses\n`;
+            config += `# a different approach to keep the car awake without involving Sentry Mode.\n`;
+            config += `#\n`;
+            config += `# There are pros and cons to consider in selecting which method works best for\n`;
+            config += `# you. \n`;
+            config += `#\n`;
+            config += `# BLE Pros/Cons:\n`;
+            config += `#   ++ Direct connection to the car; unlimited.\n`;
+            config += `#   - Added complexity to configure initially\n`;
+            config += `#   - Some security vulnerability\n`;
+            config += `#   * See Hardware wiki for more BLE hardware & software support notes:\n`;
+            config += `#     https://github.com/marcone/teslausb/wiki/Hardware\n`;
+            config += `#\n`;
+            config += `# TeslaFi/Tessie Pros/Cons:\n`;
+            config += `#   + Straightforward to configure initially\n`;
+            config += `#   + Remote monitoring and management\n`;
+            config += `#   - Tessie: If not using Sentry Mode, need to maintain a consistent\n`;
+            config += `#     wifi/interenet connection to keep car alive.\n`;
+            config += `#   - Some security vulnerability\n`;
+            config += `#   - Requires paid 3rd-party service from TeslaFi or Tessie\n`;
+            config += `#\n`;
+            config += `# Webhook Pros/Cons:\n`;
+            config += `#   + Does not require teslausb to store credentials that can directly\n`;
+            config += `#     control your vehicle\n`;
+            config += `#   - Requires another service like home assistant be setup to receive\n`;
+            config += `#     webhooks and carry out the required actions to keep the vehicle awake\n`;
+            config += `#\n`;
+            config += `# DISCLAIMER:\n`;
+            config += `#   All 3 methods have some level of security implications. For BLE,\n`;
+            config += `#   key pair is stored on the device. For TeslaFi/Tessie, the API access token\n`;
+            config += `#   (not the main login) is in the config file. Having said that, the offender\n`;
+            config += `#   would require physical access to the device and the technical knowledge to\n`;
+            config += `#   compromise your vehicle. User discretion advised.\n`;
+            config += `#\n`;
+            config += `#   Good Security Practices:\n`;
+            config += `#     * Change your TeslaUSB user passwords (pi and root)\n`;
+            config += `#     * Set user/password for the TeslaUSB AP (if enabled)\n`;
+            config += `#     * Enable Tesla's pin-to-drive\n`;
+            config += `#     * If your TeslaUSB has been compromised, immediately change your\n`;
+            config += `#       Tesla.com password, which will invalidate all 3rd-party app access.\n`;
+            config += `#       Followed by ...\n`;
+            config += `#         Tesla BLE: Login to your Tesla account and remove the BLE key pair.\n`;
+            config += `#         TeslaFi: Login to your TeslaFi account and revoke API token.\n`;
+            config += `#         Tessie: Login to your Tessie account and revoke API token.\n`;
+            config += `#         Server/WiFi: Change your login credentials.\n`;
+            config += `#\n`;
+            config += `# Other ways to keep the data port powered through sleep is to manually turning\n`;
+            config += `# on Sentry Mode or Camp Mode from the Tesla App. However, neither are great\n`;
+            config += `# solutions as they keep the car awake indefinitely, thus unnecessarily\n`;
+            config += `# consuming the car's high-voltage battery. For that reason, it's a good idea\n`;
+            config += `# to set up notification mechanisms (see preceding sections) so you know when to\n`;
+            config += `# manually turn Off Sentry/Camp Mode from the Tesla App.\n`;
+            config += `#\n`;
+            config += `# Another alternative is using a power bank or UPS hat to keep TeslaUSB powered\n`;
+            config += `# independent of the power state of the car's USB ports. See the TeslaUSB wiki\n`;
+            config += `# for more info.\n`;
+            config += `#\n`;
+            config += `# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n`;
+            config += `#  !!! IMPORTANT: Only ONE control API should be used at a time.\n`;
+            config += `#                 Do not include parameters for both TeslaFi and Tessie, or\n`;
+            config += `#                 combine BLE with either services.\n`;
+            config += `# .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .\n`;
+            config += `#\n`;
+            config += `# Determine your Keep Car Awake preference (choose 1 case). Please consider the\n`;
+            config += `# compatibility notes. If applicable, also make a 1-time change (set and\n`;
+            config += `# forget) to your in-car menu: Safety -> Sentry Mode.\n`;
+            config += `#\n`;
+            config += `#  Case 1: [Compatible with TeslaFi, Tessie, BLE, or Webhook]\n`;
+            config += `#\n`;
+            config += `#          You want Sentry Mode turned On everywhere, except when parked safely\n`;
+            config += `#          at home. Upon arriving home, Sentry Mode will already be ON\n`;
+            config += `#          to power TeslaUSB through archiving. Once archiving completes, a\n`;
+            config += `#          command will be sent to turn OFF Sentry Mode, thus allowing the car\n`;
+            config += `#          to go back to sleep. Whenever you start a new drive, car will default\n`;
+            config += `#          Sentry Mode to ON by default, per your in-car setting.\n`;
+            config += `#\n`;
+            config += `#     >>>> IMPORTANT: Verify your in-car Sentry Mode is set to ON, and\n`;
+            config += `#                     'Exclude Home' is UNCHECKED.\n`;
+            config += `#\n`;
+            config += `#  Case 2: [Compatible with TeslaFi, Tessie, BLE, or Webhook]\n`;
+            config += `#\n`;
+            config += `#          You DON'T want Sentry Mode turned on anywhere, unless archiving.\n`;
+            config += `#          Mode of operation: Upon arriving home, TeslaUSB will send a command\n`;
+            config += `#          to turn ON Sentry Mode. Once archiving completes, a command will be\n`;
+            config += `#          sent to turn OFF Sentry Mode, thus allow the car to go back to sleep.\n`;
+            config += `#          Sentry Mode will remain OFF from this point forward until the next\n`;
+            config += `#          archiving activity.\n`;
+            config += `#\n`;
+            config += `#     >>>> IMPORTANT: Verify your in-car Sentry Mode is set to OFF.\n`;
+            config += `#\n`;
+            config += `#  Case 3: [Compatible with Tessie, BLE, or Webhook]\n`;
+            config += `#\n`;
+            config += `#          Sentry Mode is not used by TeslaUSB. Instead a periodic command is\n`;
+            config += `#          sent to the car to keep it awake.\n`;
+            config += `#\n`;
+            config += `# Provide your use case here:\n`;
+            if (document.getElementById('enable_sentry_case').checked) {
+                const sentryCase = document.querySelector('input[name="sentry_case"]:checked');
+                if (sentryCase) {
+                    config += `export SENTRY_CASE=${sentryCase.value}\n`;
+                } else {
+                    config += `#export SENTRY_CASE=1\n`;
+                }
+            } else {
+                config += `#export SENTRY_CASE=1\n`;
+            }
+            config += `#\n`;
+            config += `# .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .\n`;
+            config += `#\n`;
+            config += `# For TeslaFi, provide your API token here:\n`;
+            if (document.getElementById('enable_teslafi').checked) {
+                config += `export TESLAFI_API_TOKEN='${document.getElementById('TESLAFI_API_TOKEN').value}'\n`;
+            } else {
+                config += `#export TESLAFI_API_TOKEN='YOUR_TESLAFI_API_TOKEN_GOES_HERE'\n`;
+            }
+            config += `#\n`;
+            config += `#   How to generate TeslaFi API Tokens:\n`;
+            config += `#     1. Log into your TeslaFi account.\n`;
+            config += `#     2. Navigate to Settings -> Tesla API -> API Token (tab).\n`;
+            config += `#\n`;
+            config += `#   Enable TeslaFi API Command:\n`;
+            config += `#     1. Navigate to Settings -> Tesla API -> Commands (tab).\n`;
+            config += `#     2. Verify 'Sentry Mode' command is checked (enabled).\n`;
+            config += `#     3. For added security, recommend disabling 'Unlock' command.\n`;
+            config += `# .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .\n`;
+            config += `#\n`;
+            config += `# For Tessie, provide your API token and vehicle VIN here:\n`;
+            if (document.getElementById('enable_tessie').checked) {
+                config += `export TESSIE_API_TOKEN='${document.getElementById('TESSIE_API_TOKEN').value}'\n`;
+                config += `export TESSIE_VIN=${document.getElementById('TESSIE_VIN').value}\n`;
+            } else {
+                config += `#export TESSIE_API_TOKEN='YOUR_TESSIE_API_TOKEN_GOES_HERE'\n`;
+                config += `#export TESSIE_VIN=5YJ3E1EA4JF000001\n`;
+            }
+            config += `#\n`;
+            config += `#   How to generate Tessie API Tokens\n`;
+            config += `#     1. Log into your Tessie account.\n`;
+            config += `#     2. Navigate to Settings -> Developer API -> Generate access token.\n`;
+            config += `# .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .\n`;
+            config += `#\n`;
+            config += `# For BLE, provide your vehicle VIN here:\n`;
+            if (document.getElementById('enable_tesla_ble').checked) {
+                config += `export TESLA_BLE_VIN=${document.getElementById('TESLA_BLE_VIN').value}\n`;
+            } else {
+                config += `#export TESLA_BLE_VIN=5YJ3E1EA4JF000001\n`;
+            }
+            config += `#\n`;
+            config += `#   Pairing TeslaUSB as a BLE device:\n`;
+            config += `#   \n`;
+            config += `#    1.  Ensure the TeslaUSB device is inside the vehicle and powered.\n`;
+            config += `#\n`;
+            config += `#    2a. From the TeslaUSB Web UI: Menu > Tools > Pair BLE with Car\n`;
+            config += `#    2b. Alternatively, if Web UI was not enabled, from the SSH command line:\n`;
+            config += `#        sudo /root/bin/tesla-control -ble -vin <your VIN> add-key-request /root/.ble/key_public.pem owner cloud_key\n`;
+            config += `#\n`;
+            config += `#    3.  Shortly after initiating pairing, a request is shown for an authorized\n`;
+            config += `#        key card. Please tap a key card on the center console promptly and\n`;
+            config += `#        confirm on the in-car screen.\n`;
+            config += `#\n`;
+            config += `#    4.  If done successfully, you'll see an "Unknown Key" (can be renamed)\n`;
+            config += `#        entry under the in-car Locks screen.\n`;
+            config += `#\n`;
+            config += `#        Note: This does not prevent the car from locking, nor does it allow\n`;
+            config += `#        someone to readily unlock or drive the car. An authroized key (card,\n`;
+            config += `#        phone, fob) is still required.\n`;
+            config += `# .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .\n`;
+            config += `#\n`;
+            config += `# For webhook, provide the URL of the webhook that will receive awake messages:\n`;
+            if (document.getElementById('enable_keep_awake_webhook').checked) {
+                config += `export KEEP_AWAKE_WEBHOOK_URL=${document.getElementById('KEEP_AWAKE_WEBHOOK_URL').value}\n`;
+            } else {
+                config += `#export KEEP_AWAKE_WEBHOOK_URL=http://domain/path\n`;
+            }
+            config += `#\n`;
+            config += `#   A webhook message with a JSON body will be sent. The shape of the JSON will be { "awake_command": "<command>" }\n`;
+            config += `#   Commands that will be sent to this webook:\n`;
+            config += `#     1. start: Sent when SENTRY_CASE=2 and the archive process starts\n`;
+            config += `#     2. stop: Sent when SENTRY_CASE=1 or 2 and the archive process stops\n`;
+            config += `#     3. nudge: Sent when SENTRY_CASE=3 and the archive process is ongoing\n`;
+            config += `################################################################################\n\n`;
+
+            // Temperature Monitor
+            config += `# Temperature Monitor\n`;
+            config += `#   Understanding your device's thermal profile is crucial for maintaining\n`;
+            config += `#   performance and reliability. As a point of reference, Raspberry Pi\n`;
+            config += `#   Foundation states that its operating temperature range is 0°C to 85°C, and\n`;
+            config += `#   the system will begin to throttle the processor when it reaches 80°C to\n`;
+            config += `#   prevent damage. Anecdotally, other sub-components may become unstable at\n`;
+            config += `#   lower thresholds (e.g., Wi-Fi). As a general best practice, keep the\n`;
+            config += `#   temperature below 70°C. Start monitoring closely when it regularly reaches\n`;
+            config += `#   above 60°C. Differences between manufacturer, model, and revisions should\n`;
+            config += `#   also be considered.\n`;
+            config += `#\n`;
+            config += `#   Uncommenting any of the following parameters will activate TeslaUSB's\n`;
+            config += `#   temperature monitoring, which checks temperature once a minute and retains\n`;
+            config += `#   the maximum value until the device is reset or powered-off.\n`;
+            config += `#\n`;
+            config += `#   The following parameters determine when log entries and push messages, if\n`;
+            config += `#   configured, are triggered. The fixed-interval case will only log entries,\n`;
+            config += `#   but not send push message, to avoid over-saturating \n`;
+            config += `#\n`;
+            config += `#   Triggers:\n`;
+            config += `#   \n`;
+            config += `#   Two (2) temperature threshold triggers for: WARNING and CAUTION.\n`;
+            config += `#   The triggers will only fire once to cut down on spam. Only when the\n`;
+            config += `#   temperatures settles 5 deg°C below the set thresholds, are they allowed to\n`;
+            config += `#   re-trigger again. Caution is generally considered less severe than Warning,\n`;
+            config += `#   but you have the freedom to set or unset them as you please. Set values\n`;
+            config += `#   must be integers and expressed in milli-°C (e.g., 68.0°C = 68000)\n`;
+            if (document.getElementById('enable_temp_warning').checked) {
+                config += `export TEMPERATURE_WARNING=${document.getElementById('TEMPERATURE_WARNING').value}\n`;
+            } else {
+                config += `#export TEMPERATURE_WARNING=68000\n`;
+            }
+            if (document.getElementById('enable_temp_caution').checked) {
+                config += `export TEMPERATURE_CAUTION=${document.getElementById('TEMPERATURE_CAUTION').value}\n`;
+            } else {
+                config += `#export TEMPERATURE_CAUTION=55000\n`;
+            }
+            config += `#\n`;
+            config += `#   Fixed-interval trigger logs (no push messages) the instantaneous and maximum\n`;
+            config += `#   values. The maximum value is held through the recording period and reset at\n`;
+            config += `#   the conclusion of the archiving/music sync process. This trigger may be useful\n`;
+            config += `#   to better understand the thermal activity throughout the day.\n`;
+            config += `#   The set value must be an integer and expressed in minutes (minimum = 1).  \n`;
+            if (document.getElementById('enable_temp_interval').checked) {
+                config += `export TEMPERATURE_INTERVAL=${document.getElementById('TEMPERATURE_INTERVAL').value}\n`;
+            } else {
+                config += `#export TEMPERATURE_INTERVAL=60\n`;
+            }
+            config += `#\n`;
+            config += `#   At the end of each archiving/music sync process, the device typically runs\n`;
+            config += `#   hotter, making it an ideal time to capture temperature.\n`;
+            if (document.getElementById('enable_temp_postarchive').checked) {
+                config += `export TEMPERATURE_POSTARCHIVE=true\n\n`;
+            } else {
+                config += `#export TEMPERATURE_POSTARCHIVE=true\n\n`;
+            }
+
+            // Advanced options
+            config += `# Uncomment if you want to increase the size of the root\n`;
+            config += `# filesystem so there's extra space for installing additional\n`;
+            config += `# software. This only works if the backing store partition hasn't\n`;
+            config += `# been created yet, i.e. during early setup, and requires an extra\n`;
+            config += `# reboot. Sizes can be specified as for example "500M" or "2G"\n`;
+            if (document.getElementById('enable_increase_root').checked) {
+                config += `export INCREASE_ROOT_SIZE=${document.getElementById('INCREASE_ROOT_SIZE').value}\n\n`;
+            } else {
+                config += `# export INCREASE_ROOT_SIZE=500M\n\n`;
+            }
+
+            config += `# Uncomment if you want to have teslausb automatically install some\n`;
+            config += `# additional packages during setup. This only works if there is enough\n`;
+            config += `# free space available on the root partition to install the requested packages.\n`;
+            config += `# Requested packages should be space delineated\n`;
+            if (document.getElementById('enable_user_packages').checked) {
+                config += `export INSTALL_USER_REQUESTED_PACKAGES="${document.getElementById('INSTALL_USER_REQUESTED_PACKAGES').value}"\n\n`;
+            } else {
+                config += `# export INSTALL_USER_REQUESTED_PACKAGES="iftop mosh sysstat"\n\n`;
+            }
+
+            config += `# Uncomment if you want to use different vm/cpu parameters.\n`;
+            config += `# Leave commented to use teslausb's defaults, or set to 'default'\n`;
+            config += `# to use the system defaults.\n`;
+            config += `# See https://www.kernel.org/doc/Documentation/sysctl/vm.txt\n`;
+            config += `# and https://www.kernel.org/doc/Documentation/cpu-freq/governors.txt\n`;
+            config += `# for details.\n`;
+            if (document.getElementById('enable_vm_params').checked) {
+                if (document.getElementById('DIRTY_BACKGROUND_BYTES').value) {
+                    config += `export DIRTY_BACKGROUND_BYTES=${document.getElementById('DIRTY_BACKGROUND_BYTES').value}\n`;
+                } else {
+                    config += `#export DIRTY_BACKGROUND_BYTES=65536\n`;
+                }
+                if (document.getElementById('DIRTY_RATIO').value) {
+                    config += `export DIRTY_RATIO=${document.getElementById('DIRTY_RATIO').value}\n`;
+                } else {
+                    config += `#export DIRTY_RATIO=80\n`;
+                }
+                if (document.getElementById('CPU_GOVERNOR').value) {
+                    config += `export CPU_GOVERNOR=${document.getElementById('CPU_GOVERNOR').value}\n\n`;
+                } else {
+                    config += `#export CPU_GOVERNOR=conservative\n\n`;
+                }
+            } else {
+                config += `#export DIRTY_BACKGROUND_BYTES=65536\n`;
+                config += `#export DIRTY_RATIO=80\n`;
+                config += `#export CPU_GOVERNOR=conservative\n\n`;
+            }
+
+            config += `# Uncomment and change if you want setup scripts to be pulled\n`;
+            config += `# from a different repo than github.com/marcone/teslausb\n`;
+            if (document.getElementById('enable_repo').checked) {
+                config += `export REPO=${document.getElementById('REPO').value}\n\n`;
+            } else {
+                config += `# export REPO=marcone\n\n`;
+            }
+
+            config += `# Uncomment and change if you want a different branch than main-dev\n`;
+            if (document.getElementById('enable_branch').checked) {
+                config += `export BRANCH=${document.getElementById('BRANCH').value}\n`;
+            } else {
+                config += `# export BRANCH=main-dev\n`;
+            }
+
+            // Download the file
+            const blob = new Blob([config], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'teslausb_setup_variables.conf';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            alert('¡Configuración generada! El archivo "teslausb_setup_variables.conf" se descargará ahora.\n\nRecuerda renombrarlo a "teslausb_setup_variables.conf" y colocarlo en la carpeta "boot" de tu tarjeta SD.');
+        }
+
+        function resetForm() {
+            if (confirm('¿Estás seguro de que quieres reiniciar todo el formulario? Se perderán todos los datos ingresados.')) {
+                location.reload();
+            }
+        }
+
+        // Initialize by opening first section
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstSection = document.querySelector('.section-header');
+            if (firstSection) {
+                toggleSection(firstSection);
+            }
+        });
+    </script>
+</body>
+</html>
